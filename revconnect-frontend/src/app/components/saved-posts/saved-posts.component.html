@@ -1,0 +1,28 @@
+<div class="saved-wrapper">
+  <div class="saved-header card">
+    <div class="saved-header-inner">
+      <div class="saved-icon"><i class="fa-solid fa-bookmark"></i></div>
+      <div>
+        <h1 class="saved-title">Saved Posts</h1>
+        <p class="saved-sub">Posts you've bookmarked — only visible to you.</p>
+      </div>
+    </div>
+    <a routerLink="/feed" class="btn-back">
+      <i class="fa-solid fa-arrow-left"></i> Back to Feed
+    </a>
+  </div>
+
+  <div *ngIf="posts.length === 0" class="card empty-saved">
+    <i class="fa-regular fa-bookmark empty-icon"></i>
+    <p>No saved posts yet.</p>
+    <small>Hit the <i class="fa-regular fa-bookmark"></i> bookmark on any post to save it here.</small>
+    <a routerLink="/feed" class="btn-go-feed">Go to Feed</a>
+  </div>
+
+  <app-post-card
+    *ngFor="let post of posts"
+    [post]="post"
+    (postDeleted)="onPostDeleted($event)"
+    (postUpdated)="onPostUpdated($event)">
+  </app-post-card>
+</div>

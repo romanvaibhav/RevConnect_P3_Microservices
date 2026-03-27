@@ -1,0 +1,100 @@
+<div class="biz-dashboard">
+
+  <!-- Access Denied -->
+  <div *ngIf="accessDenied" class="access-denied">
+    <span class="lock-icon">🔒</span>
+    <h2>Business Dashboard is for Business accounts only</h2>
+    <a routerLink="/feed" class="btn-primary">Back to Feed</a>
+  </div>
+
+  <ng-container *ngIf="!accessDenied">
+
+    <!-- Header -->
+    <div class="dash-header">
+      <div>
+        <h1>🏢 Business Dashboard</h1>
+        <p class="dash-sub">Manage your business page, posts, and customer interactions</p>
+      </div>
+      <div class="dash-header-actions">
+        <span class="follower-badge">👥 {{ followerCount }} Followers</span>
+        <a [routerLink]="['/business', authService.getCurrentUserId()]" class="btn-view-page">View Public Page</a>
+        <button class="btn-compose" (click)="showCompose = !showCompose">
+          {{ showCompose ? '✕ Cancel' : '+ New Post' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="stats-row">
+      <div class="stat-chip">📝 <strong>{{ posts.length }}</strong> Total Posts</div>
+      <div class="stat-chip">📢 <strong>{{ announcementCount }}</strong> Announcements</div>
+      <div class="stat-chip">🛍️ <strong>{{ promotionalCount }}</strong> Promotional</div>
+      <div class="stat-chip">🕐 <strong>{{ scheduledCount }}</strong> Scheduled</div>
+    </div>
+
+    <!-- Compose Panel -->
+    <div *ngIf="showCompose" class="compose-panel">
+      <h3>Create Post</h3>
+
+      <div class="post-type-selector">
+        <button class="type-btn" [class.active]="composeType === 'REGULAR'" (click)="composeType = 'REGULAR'">📝 Update</button>
+        <button class="type-btn" [class.active]="composeType === 'ANNOUNCEMENT'" (click)="composeType = 'ANNOUNCEMENT'">📢 Announcement</button>
+        <button class="type-btn" [class.active]="composeType === 'PROMOTIONAL'" (click)="composeType = 'PROMOTIONAL'">🛍️ Promotional</button>
+      </div>
+
+      <textarea class="compose-textarea" [(ngModel)]="composeContent" rows="4"
+        [placeholder]="composeType === 'ANNOUNCEMENT' ? 'Share an important announcement with your followers...'
+          : composeType === 'PROMOTIONAL' ? 'Describe your product, offer, or promotion...'
+          : 'Share an update with your followers...'">
+      </textarea>
+
+      <div class="compose-options">
+        <div class="compose-field">
+          <label>Hashtags</label>
+          <input type="text" [(ngModel)]="composeHashtags" placeholder="e.g. sale, newproduct, launch" />
+        </div>
+        <div class="compose-field" *ngIf="composeType === 'PROMOTIONAL'">
+          <label>Call to Action</label>
+          <select [(ngModel)]="composeCta">
+            <option *ngFor="let opt of ctaOptions" [value]="opt.value">{{ opt.label }}</option>
+          </select>
+        </div>
+        <div class="compose-field">
+          <label>Schedule (optional)</label>
+          <input type="datetime-local" [(ngModel)]="composeScheduledAt" />
+        </div>
+      </div>
+
+      <div class="compose-actions">
+        <div class="compose-feedback">
+          <span class="success-msg" *ngIf="postSuccess">✅ {{ postSuccess }}</span>
+          <span class="error-msg" *ngIf="postError">❌ {{ postError }}</span>
+        </div>
+        <button class="btn-publish" (click)="submitPost()" [disabled]="!composeContent.trim() || isPosting">
+          {{ isPosting ? 'Publishing...' : composeScheduledAt ? '🕐 Schedule Post' : '🚀 Publish' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Post Tabs -->
+    <div class="post-tabs">
+      <button class="tab-btn" [class.active]="activeTab === 'all'" (click)="activeTab = 'all'">All Posts</button>
+      <button class="tab-btn" [class.active]="activeTab === 'updates'" (click)="activeTab = 'updates'">Updates</button>
+      <button class="tab-btn" [class.active]="activeTab === 'announcements'" (click)="activeTab = 'announcements'">Announcements</button>
+      <button class="tab-btn" [class.active]="activeTab === 'promotional'" (click)="activeTab = 'promotional'">Promotional</button>
+    </div>
+
+    <!-- Posts List -->
+    <div *ngIf="isLoading" class="loading">Loading posts...</div>
+    <div *ngIf="!isLoading && filteredPosts.length === 0" class="empty">No posts in this category yet.</div>
+    <div class="posts-list">
+      <app-post-card
+        *ngFor="let post of filteredPosts"
+        [post]="post"
+        (postDeleted)="onPostDeleted($event)"
+        (postUpdated)="onPostUpdated($event)">
+      </app-post-card>
+    </div>
+
+  </ng-container>
+</div>

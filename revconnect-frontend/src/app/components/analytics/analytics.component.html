@@ -1,0 +1,143 @@
+<div class="analytics-page">
+
+  <!-- Access Denied -->
+  <div *ngIf="accessDenied" class="access-denied">
+    <div class="access-denied-card">
+      <span class="lock-icon"><i class="fa-solid fa-lock"></i></span>
+      <h2>Analytics is for Creators & Businesses</h2>
+      <p>Upgrade your account to access detailed analytics and insights.</p>
+      <a routerLink="/feed" class="btn-primary">Back to Feed</a>
+    </div>
+  </div>
+
+  <!-- Main Dashboard -->
+  <div *ngIf="!accessDenied">
+    <div class="analytics-header">
+      <h1>Analytics Dashboard</h1>
+      <span class="follower-badge"><i class="fa-solid fa-user-group"></i> {{ followerCount }} Followers</span>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab-btn" [class.active]="activeTab === 'overview'" (click)="setTab('overview')">Overview</button>
+      <button class="tab-btn" [class.active]="activeTab === 'posts'" (click)="setTab('posts')">Post Analytics</button>
+      <button class="tab-btn" [class.active]="activeTab === 'engagement'" (click)="setTab('engagement')">Engagement</button>
+    </div>
+
+    <div *ngIf="isLoading" class="loading">Loading analytics...</div>
+
+    <!-- Overview Tab -->
+    <div *ngIf="!isLoading && activeTab === 'overview'" class="tab-content">
+      <div class="stat-cards" *ngIf="summary">
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fa-solid fa-pen-to-square"></i></div>
+          <div class="stat-value">{{ summary.totalPosts }}</div>
+          <div class="stat-label">Total Posts</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fa-solid fa-eye"></i></div>
+          <div class="stat-value">{{ summary.totalViews }}</div>
+          <div class="stat-label">Total Views</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fa-solid fa-heart"></i></div>
+          <div class="stat-value">{{ summary.totalLikes }}</div>
+          <div class="stat-label">Total Likes</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fa-solid fa-comment"></i></div>
+          <div class="stat-value">{{ summary.totalComments }}</div>
+          <div class="stat-label">Total Comments</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fa-solid fa-retweet"></i></div>
+          <div class="stat-value">{{ summary.totalShares }}</div>
+          <div class="stat-label">Total Shares</div>
+        </div>
+        <div class="stat-card highlight">
+          <div class="stat-icon"><i class="fa-solid fa-chart-line"></i></div>
+          <div class="stat-value">{{ engagementRate | number:'1.1-2' }}%</div>
+          <div class="stat-label">Avg Engagement Rate</div>
+        </div>
+      </div>
+      <div *ngIf="!summary" class="empty-state">No analytics data yet. Start posting to see insights.</div>
+    </div>
+
+    <!-- Post Analytics Tab -->
+    <div *ngIf="!isLoading && activeTab === 'posts'" class="tab-content">
+      <div *ngIf="postRows.length === 0" class="empty-state">No post analytics available yet.</div>
+      <div *ngIf="postRows.length > 0" class="table-wrapper">
+        <table class="analytics-table">
+          <thead>
+            <tr>
+              <th (click)="sortBy('postId')" class="sortable">Post ID <span>↕</span></th>
+              <th (click)="sortBy('views')" class="sortable">Views <span>↕</span></th>
+              <th (click)="sortBy('likes')" class="sortable">Likes <span>↕</span></th>
+              <th (click)="sortBy('comments')" class="sortable">Comments <span>↕</span></th>
+              <th (click)="sortBy('shares')" class="sortable">Shares <span>↕</span></th>
+              <th (click)="sortBy('engagementRate')" class="sortable">Engagement % <span>↕</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of postRows">
+              <td>#{{ row.postId }}</td>
+              <td>{{ row.views }}</td>
+              <td>{{ row.likes }}</td>
+              <td>{{ row.comments }}</td>
+              <td>{{ row.shares }}</td>
+              <td>
+                <span class="engagement-pill" [class.high]="row.engagementRate >= 5" [class.mid]="row.engagementRate >= 2 && row.engagementRate < 5">
+                  {{ row.engagementRate | number:'1.1-2' }}%
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Engagement Tab -->
+    <div *ngIf="!isLoading && activeTab === 'engagement'" class="tab-content">
+      <div *ngIf="summary" class="engagement-section">
+        <div class="engagement-header">
+          <h3>Engagement Breakdown</h3>
+          <span class="total-eng">Total Engagements: <strong>{{ totalEngagements }}</strong></span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label"><i class="fa-solid fa-heart"></i> Likes</span>
+          <div class="metric-bar-bg">
+            <div class="metric-bar likes-bar" [style.width]="barWidth(summary.totalLikes, totalEngagements)"></div>
+          </div>
+          <span class="metric-count">{{ summary.totalLikes }}</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label"><i class="fa-solid fa-comment"></i> Comments</span>
+          <div class="metric-bar-bg">
+            <div class="metric-bar comments-bar" [style.width]="barWidth(summary.totalComments, totalEngagements)"></div>
+          </div>
+          <span class="metric-count">{{ summary.totalComments }}</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label"><i class="fa-solid fa-retweet"></i> Shares</span>
+          <div class="metric-bar-bg">
+            <div class="metric-bar shares-bar" [style.width]="barWidth(summary.totalShares, totalEngagements)"></div>
+          </div>
+          <span class="metric-count">{{ summary.totalShares }}</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label"><i class="fa-solid fa-eye"></i> Views</span>
+          <div class="metric-bar-bg">
+            <div class="metric-bar views-bar" [style.width]="barWidth(summary.totalViews, maxViews)"></div>
+          </div>
+          <span class="metric-count">{{ summary.totalViews }}</span>
+        </div>
+        <div class="engagement-rate-display">
+          <span>Avg Engagement Rate</span>
+          <strong>{{ engagementRate | number:'1.1-2' }}%</strong>
+        </div>
+      </div>
+      <div *ngIf="!summary" class="empty-state">No engagement data yet.</div>
+    </div>
+
+  </div>
+</div>

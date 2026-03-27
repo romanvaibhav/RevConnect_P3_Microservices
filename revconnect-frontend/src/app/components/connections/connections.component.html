@@ -1,0 +1,169 @@
+<div class="container">
+  <div class="connections-layout">
+
+    <div class="alert alert-success" *ngIf="successMessage">{{ successMessage }}</div>
+    <div class="alert alert-error" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+    <!-- Tabs -->
+    <div class="tabs-bar">
+      <button class="tab-btn" [class.active]="activeTab === 'connections'" (click)="setTab('connections')">
+        <i class="fa-solid fa-handshake"></i> Connections <span class="count-badge">{{ myConnections.length }}</span>
+      </button>
+      <button class="tab-btn" [class.active]="activeTab === 'received'" (click)="setTab('received')">
+        <i class="fa-solid fa-inbox"></i> Received <span class="count-badge" [class.has-items]="pendingReceived.length > 0">{{ pendingReceived.length }}</span>
+      </button>
+      <button class="tab-btn" [class.active]="activeTab === 'sent'" (click)="setTab('sent')">
+        <i class="fa-solid fa-paper-plane"></i> Sent <span class="count-badge">{{ pendingSent.length }}</span>
+      </button>
+      <button class="tab-btn" [class.active]="activeTab === 'followers'" (click)="setTab('followers')">
+        <i class="fa-solid fa-user-group"></i> Followers <span class="count-badge">{{ followers.length }}</span>
+      </button>
+      <button class="tab-btn" [class.active]="activeTab === 'following'" (click)="setTab('following')">
+        <i class="fa-solid fa-user-plus"></i> Following <span class="count-badge">{{ following.length }}</span>
+      </button>
+      <button class="tab-btn" [class.active]="activeTab === 'follow-requests'" (click)="setTab('follow-requests')">
+        <i class="fa-solid fa-envelope"></i> Follow Requests <span class="count-badge" [class.has-items]="pendingFollowRequests.length > 0">{{ pendingFollowRequests.length }}</span>
+      </button>
+    </div>
+
+    <!-- My Connections -->
+    <div *ngIf="activeTab === 'connections'" class="tab-content">
+      <h2 class="section-title">My Connections</h2>
+      <div *ngIf="myConnections.length === 0" class="empty-state">
+        <span class="empty-icon"><i class="fa-solid fa-handshake"></i></span>
+        <p>No connections yet. Search for people to connect with.</p>
+        <a routerLink="/search" class="btn btn-primary">Find People</a>
+      </div>
+      <div class="user-list">
+        <div *ngFor="let item of myConnections" class="user-card">
+          <div class="user-avatar">{{ getInitial(item.user) }}</div>
+          <div class="user-info">
+            <a [routerLink]="['/profile', item.user?.id]" class="user-name">{{ item.user?.name || 'Unknown' }}</a>
+            <p class="user-meta">&#64;{{ item.user?.username }} · <span class="role-badge">{{ item.user?.role }}</span></p>
+            <p class="user-bio" *ngIf="item.user?.bio">{{ item.user?.bio }}</p>
+          </div>
+          <div class="card-actions">
+            <a [routerLink]="['/profile', item.user?.id]" class="btn btn-outline btn-sm">View Profile</a>
+            <button (click)="removeConnection(item)" class="btn btn-danger btn-sm">Remove</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Received Requests -->
+    <div *ngIf="activeTab === 'received'" class="tab-content">
+      <h2 class="section-title">Received Connection Requests</h2>
+      <div *ngIf="pendingReceived.length === 0" class="empty-state">
+        <span class="empty-icon"><i class="fa-solid fa-inbox"></i></span>
+        <p>No pending requests.</p>
+      </div>
+      <div class="user-list">
+        <div *ngFor="let item of pendingReceived" class="user-card">
+          <div class="user-avatar">{{ getInitial(item.user) }}</div>
+          <div class="user-info">
+            <a [routerLink]="['/profile', item.user?.id]" class="user-name">{{ item.user?.name || 'User #' + item.connection.requesterId }}</a>
+            <p class="user-meta">&#64;{{ item.user?.username }} · <span class="role-badge">{{ item.user?.role }}</span></p>
+            <p class="request-time">Sent {{ item.connection.createdAt | date:'mediumDate' }}</p>
+          </div>
+          <div class="card-actions">
+            <button (click)="acceptConnection(item)" class="btn btn-success btn-sm">Accept</button>
+            <button (click)="rejectConnection(item)" class="btn btn-secondary btn-sm">Decline</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sent Requests -->
+    <div *ngIf="activeTab === 'sent'" class="tab-content">
+      <h2 class="section-title">Sent Connection Requests</h2>
+      <div *ngIf="pendingSent.length === 0" class="empty-state">
+        <span class="empty-icon"><i class="fa-solid fa-paper-plane"></i></span>
+        <p>No pending sent requests.</p>
+      </div>
+      <div class="user-list">
+        <div *ngFor="let item of pendingSent" class="user-card">
+          <div class="user-avatar">{{ getInitial(item.user) }}</div>
+          <div class="user-info">
+            <a [routerLink]="['/profile', item.user?.id]" class="user-name">{{ item.user?.name || 'User #' + item.connection.receiverId }}</a>
+            <p class="user-meta">&#64;{{ item.user?.username }} · <span class="role-badge">{{ item.user?.role }}</span></p>
+            <p class="request-time">Sent {{ item.connection.createdAt | date:'mediumDate' }}</p>
+          </div>
+          <div class="card-actions">
+            <span class="status-badge pending">Pending</span>
+            <button (click)="cancelRequest(item)" class="btn btn-secondary btn-sm">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Followers -->
+    <div *ngIf="activeTab === 'followers'" class="tab-content">
+      <h2 class="section-title">Followers</h2>
+      <div *ngIf="followers.length === 0" class="empty-state">
+        <span class="empty-icon"><i class="fa-solid fa-user-group"></i></span>
+        <p>Nobody is following you yet.</p>
+      </div>
+      <div class="user-list">
+        <div *ngFor="let item of followers" class="user-card">
+          <div class="user-avatar">{{ getInitial(item.user) }}</div>
+          <div class="user-info">
+            <a [routerLink]="['/profile', item.user?.id]" class="user-name">{{ item.user?.name || 'User #' + item.userId }}</a>
+            <p class="user-meta">&#64;{{ item.user?.username }} · <span class="role-badge">{{ item.user?.role }}</span></p>
+            <p class="user-bio" *ngIf="item.user?.bio">{{ item.user?.bio }}</p>
+          </div>
+          <div class="card-actions">
+            <a [routerLink]="['/profile', item.user?.id]" class="btn btn-outline btn-sm">View Profile</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Following -->
+    <div *ngIf="activeTab === 'following'" class="tab-content">
+      <h2 class="section-title">Following</h2>
+      <div *ngIf="following.length === 0" class="empty-state">
+        <span class="empty-icon"><i class="fa-solid fa-user-plus"></i></span>
+        <p>You're not following anyone yet.</p>
+        <a routerLink="/search" class="btn btn-primary">Discover People</a>
+      </div>
+      <div class="user-list">
+        <div *ngFor="let item of following" class="user-card">
+          <div class="user-avatar">{{ getInitial(item.user) }}</div>
+          <div class="user-info">
+            <a [routerLink]="['/profile', item.user?.id]" class="user-name">{{ item.user?.name || 'User #' + item.userId }}</a>
+            <p class="user-meta">&#64;{{ item.user?.username }} · <span class="role-badge">{{ item.user?.role }}</span></p>
+            <p class="user-bio" *ngIf="item.user?.bio">{{ item.user?.bio }}</p>
+          </div>
+          <div class="card-actions">
+            <a [routerLink]="['/profile', item.user?.id]" class="btn btn-outline btn-sm">View Profile</a>
+            <button (click)="unfollowUser(item)" class="btn btn-secondary btn-sm">Unfollow</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Follow Requests -->
+    <div *ngIf="activeTab === 'follow-requests'" class="tab-content">
+      <h2 class="section-title">Follow Requests</h2>
+      <div *ngIf="pendingFollowRequests.length === 0" class="empty-state">
+        <span class="empty-icon"><i class="fa-solid fa-envelope"></i></span>
+        <p>No pending follow requests.</p>
+      </div>
+      <div class="user-list">
+        <div *ngFor="let item of pendingFollowRequests" class="user-card">
+          <div class="user-avatar">{{ getInitial(item.user) }}</div>
+          <div class="user-info">
+            <a [routerLink]="['/profile', item.user?.id]" class="user-name">{{ item.user?.name || 'User #' + item.userId }}</a>
+            <p class="user-meta">&#64;{{ item.user?.username }} · <span class="role-badge">{{ item.user?.role }}</span></p>
+            <p class="user-bio" *ngIf="item.user?.bio">{{ item.user?.bio }}</p>
+          </div>
+          <div class="card-actions">
+            <button (click)="acceptFollowRequest(item)" class="btn btn-success btn-sm">Accept</button>
+            <button (click)="rejectFollowRequest(item)" class="btn btn-secondary btn-sm">Decline</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

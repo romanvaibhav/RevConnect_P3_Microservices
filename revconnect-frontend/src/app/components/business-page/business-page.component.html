@@ -1,0 +1,111 @@
+<div class="biz-page" *ngIf="!isLoading && user; else loadingTpl">
+
+  <!-- Hero Banner -->
+  <div class="biz-hero">
+    <div class="biz-hero-content">
+      <div class="biz-avatar">{{ (businessProfile?.companyName || user.name || 'B').charAt(0).toUpperCase() }}</div>
+      <div class="biz-hero-info">
+        <h1>{{ businessProfile?.companyName || user.name }}</h1>
+        <p class="biz-industry" *ngIf="businessProfile?.industry">{{ businessProfile!.industry }}</p>
+        <p class="biz-size" *ngIf="businessProfile?.companySize">{{ businessProfile!.companySize }} employees</p>
+        <div class="biz-meta">
+          <span *ngIf="businessProfile?.city || businessProfile?.country">
+            📍 {{ businessProfile!.city }}<span *ngIf="businessProfile!.city && businessProfile!.country">, </span>{{ businessProfile!.country }}
+          </span>
+          <span *ngIf="businessProfile?.websiteUrl">
+            🌐 <a [href]="businessProfile!.websiteUrl" target="_blank" rel="noopener">{{ businessProfile!.websiteUrl }}</a>
+          </span>
+        </div>
+      </div>
+      <div class="biz-hero-actions">
+        <div class="follower-count">{{ followerCount }} Followers</div>
+        <ng-container *ngIf="!isOwnPage">
+          <button *ngIf="!isFollowing" (click)="follow()" class="btn-follow">Follow</button>
+          <button *ngIf="isFollowing" (click)="unfollow()" class="btn-unfollow">Following ✓</button>
+        </ng-container>
+        <a *ngIf="isOwnPage" routerLink="/business-dashboard" class="btn-manage">Manage Page</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="biz-tabs">
+    <button class="tab-btn" [class.active]="activeTab === 'posts'" (click)="activeTab = 'posts'">Posts</button>
+    <button class="tab-btn" [class.active]="activeTab === 'about'" (click)="activeTab = 'about'">About</button>
+  </div>
+
+  <div class="biz-body">
+
+    <!-- Posts Tab -->
+    <div *ngIf="activeTab === 'posts'" class="biz-posts">
+      <p *ngIf="posts.length === 0" class="empty">No posts yet.</p>
+      <app-post-card
+        *ngFor="let post of posts"
+        [post]="post"
+        (postDeleted)="onPostDeleted($event)"
+        (postUpdated)="onPostUpdated($event)">
+      </app-post-card>
+    </div>
+
+    <!-- About Tab -->
+    <div *ngIf="activeTab === 'about'" class="biz-about">
+
+      <div class="about-card" *ngIf="businessProfile?.description">
+        <h3>About</h3>
+        <p>{{ businessProfile!.description }}</p>
+      </div>
+
+      <div class="about-card" *ngIf="businessProfile?.contactEmail || businessProfile?.phoneNumber">
+        <h3>Contact</h3>
+        <div class="detail-row" *ngIf="businessProfile?.contactEmail">✉️ {{ businessProfile!.contactEmail }}</div>
+        <div class="detail-row" *ngIf="businessProfile?.phoneNumber">📞 {{ businessProfile!.phoneNumber }}</div>
+      </div>
+
+      <div class="about-card" *ngIf="businessProfile?.businessAddress || businessProfile?.city">
+        <h3>Address</h3>
+        <div class="detail-row" *ngIf="businessProfile?.businessAddress">🏠 {{ businessProfile!.businessAddress }}</div>
+        <div class="detail-row" *ngIf="businessProfile?.city || businessProfile?.country">
+          🌍 {{ businessProfile!.city }}<span *ngIf="businessProfile!.city && businessProfile!.country">, </span>{{ businessProfile!.country }}
+        </div>
+      </div>
+
+      <div class="about-card" *ngIf="parsedBusinessHoursEntries(businessProfile?.businessHours).length > 0">
+        <h3>Business Hours</h3>
+        <div class="hours-grid">
+          <div *ngFor="let e of parsedBusinessHoursEntries(businessProfile?.businessHours)" class="hours-row">
+            <span class="hours-day">{{ e.day }}</span>
+            <span class="hours-time">{{ e.hours }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="about-card" *ngIf="(businessProfile?.parsedSocialLinks || []).length > 0">
+        <h3>Social Media</h3>
+        <div class="links-grid">
+          <a *ngFor="let link of businessProfile?.parsedSocialLinks || []"
+             [href]="link.url" target="_blank" rel="noopener" class="social-chip">
+            {{ link.platform }}
+          </a>
+        </div>
+      </div>
+
+      <div class="about-card" *ngIf="(businessProfile?.parsedExternalLinks || []).length > 0">
+        <h3>Partnerships</h3>
+        <div class="links-grid">
+          <a *ngFor="let link of businessProfile?.parsedExternalLinks || []"
+             [href]="link.url" target="_blank" rel="noopener" class="external-chip">
+            {{ link.label }} →
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<ng-template #loadingTpl>
+  <div class="loading-state">
+    <div *ngIf="isLoading">Loading business page...</div>
+    <div *ngIf="!isLoading && !user">Business page not found.</div>
+  </div>
+</ng-template>

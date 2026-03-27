@@ -1,0 +1,82 @@
+.saved-wrapper {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.saved-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.saved-header-inner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.saved-icon {
+  width: 48px; height: 48px; border-radius: 12px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; color: #fff; flex-shrink: 0;
+}
+
+.saved-title {
+  font-size: 20px; font-weight: 800; color: #fff; margin: 0 0 4px;
+}
+
+.saved-sub {
+  font-size: 13px; color: rgba(255,255,255,0.50); margin: 0;
+}
+
+.btn-back {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 8px 16px; border-radius: 8px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.75); font-size: 13px; font-weight: 600;
+  text-decoration: none; transition: all 0.2s;
+}
+.btn-back:hover { background: rgba(255,255,255,0.14); color: #fff; }
+
+.empty-saved {
+  display: flex; flex-direction: column;
+  align-items: center; text-align: center;
+  padding: 60px 24px; gap: 10px;
+  color: rgba(255,255,255,0.55);
+}
+
+.empty-icon {
+  font-size: 48px;
+  color: rgba(165,180,252,0.40);
+  margin-bottom: 8px;
+}
+
+.empty-saved p { font-size: 16px; font-weight: 600; color: rgba(255,255,255,0.70); margin: 0; }
+.empty-saved small { font-size: 13px; color: rgba(255,255,255,0.40); }
+
+.btn-go-feed {
+  margin-top: 8px;
+  padding: 10px 24px; border-radius: 8px;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+  color: #fff; font-size: 14px; font-weight: 600;
+  text-decoration: none; transition: opacity 0.2s;
+}
+.btn-go-feed:hover { opacity: 0.88; }
+
+/* ── Responsive ── */
+@media (max-width: 600px) {
+  .saved-wrapper { padding: 12px 10px; }
+  .saved-header { padding: 16px 14px; flex-direction: column; align-items: flex-start; }
+  .saved-title { font-size: 17px; }
+  .btn-back { width: 100%; justify-content: center; }
+  .empty-saved { padding: 40px 16px; }
+}

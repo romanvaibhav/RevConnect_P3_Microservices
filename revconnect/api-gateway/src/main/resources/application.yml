@@ -1,0 +1,299 @@
+spring:
+  application:
+    name: api-gateway
+  config:
+    import: optional:configserver:${CONFIG_SERVER_URL:http://localhost:8888}
+  cloud:
+    config:
+      fail-fast: false
+      retry:
+        initial-interval: 1000
+        max-attempts: 3
+        max-interval: 2000
+    gateway:
+      routes:
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/api/users/**, /api/auth/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: user-service
+                fallbackUri: forward:/fallback/service
+        - id: user-service-uploads
+          uri: lb://user-service
+          predicates:
+            - Path=/uploads/avatars/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: user-service
+                fallbackUri: forward:/fallback/service
+        - id: post-service-uploads
+          uri: lb://post-service
+          predicates:
+            - Path=/uploads/post-media/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: post-service
+                fallbackUri: forward:/fallback/service
+        - id: post-service
+          uri: lb://post-service
+          predicates:
+            - Path=/api/posts/**
+          filters:
+            - JwtAuthentication
+            - name: CircuitBreaker
+              args:
+                name: post-service
+                fallbackUri: forward:/fallback/service
+        - id: product-service
+          uri: lb://product-service
+          predicates:
+            - Path=/api/products/**
+          filters:
+            - JwtAuthentication
+            - name: CircuitBreaker
+              args:
+                name: product-service
+                fallbackUri: forward:/fallback/service
+        - id: social-service
+          uri: lb://social-service
+          predicates:
+            - Path=/api/follows/**, /api/connections/**
+          filters:
+            - JwtAuthentication
+            - name: CircuitBreaker
+              args:
+                name: social-service
+                fallbackUri: forward:/fallback/service
+        - id: analytics-service
+          uri: lb://analytics-service
+          predicates:
+            - Path=/api/analytics/**
+          filters:
+            - JwtAuthentication
+            - name: CircuitBreaker
+              args:
+                name: analytics-service
+                fallbackUri: forward:/fallback/service
+        - id: notification-service
+          uri: lb://notification-service
+          predicates:
+            - Path=/api/notifications/**
+          filters:
+            - JwtAuthentication
+            - name: CircuitBreaker
+              args:
+                name: notification-service
+                fallbackUri: forward:/fallback/service
+        - id: feed-service
+          uri: lb://feed-service
+          predicates:
+            - Path=/api/feed/**
+          filters:
+            - JwtAuthentication
+            - name: CircuitBreaker
+              args:
+                name: feed-service
+                fallbackUri: forward:/fallback/service
+        - id: interaction-service
+          uri: lb://interaction-service
+          predicates:
+            - Path=/api/likes/**, /api/comments/**
+          filters:
+            - JwtAuthentication
+            - name: CircuitBreaker
+              args:
+                name: interaction-service
+                fallbackUri: forward:/fallback/service
+
+        # Swagger API docs routes (no auth needed)
+        - id: user-service-docs
+          uri: lb://user-service
+          predicates:
+            - Path=/user-service/v3/api-docs
+          filters:
+            - RewritePath=/user-service/v3/api-docs, /v3/api-docs
+        - id: post-service-docs
+          uri: lb://post-service
+          predicates:
+            - Path=/post-service/v3/api-docs
+          filters:
+            - RewritePath=/post-service/v3/api-docs, /v3/api-docs
+        - id: product-service-docs
+          uri: lb://product-service
+          predicates:
+            - Path=/product-service/v3/api-docs
+          filters:
+            - RewritePath=/product-service/v3/api-docs, /v3/api-docs
+        - id: social-service-docs
+          uri: lb://social-service
+          predicates:
+            - Path=/social-service/v3/api-docs
+          filters:
+            - RewritePath=/social-service/v3/api-docs, /v3/api-docs
+        - id: analytics-service-docs
+          uri: lb://analytics-service
+          predicates:
+            - Path=/analytics-service/v3/api-docs
+          filters:
+            - RewritePath=/analytics-service/v3/api-docs, /v3/api-docs
+        - id: notification-service-docs
+          uri: lb://notification-service
+          predicates:
+            - Path=/notification-service/v3/api-docs
+          filters:
+            - RewritePath=/notification-service/v3/api-docs, /v3/api-docs
+        - id: feed-service-docs
+          uri: lb://feed-service
+          predicates:
+            - Path=/feed-service/v3/api-docs
+          filters:
+            - RewritePath=/feed-service/v3/api-docs, /v3/api-docs
+        - id: interaction-service-docs
+          uri: lb://interaction-service
+          predicates:
+            - Path=/interaction-service/v3/api-docs
+          filters:
+            - RewritePath=/interaction-service/v3/api-docs, /v3/api-docs
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins:
+              - "http://localhost:3000"
+              - "http://localhost:4200"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders:
+              - "*"
+            allowCredentials: true
+
+server:
+  port: 8080
+
+jwt:
+  secret: ${JWT_SECRET:revconnect-secret-key-for-jwt-token-generation-2026-secure-microservices}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_SERVER_URL:http://localhost:8761/eureka/}
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      user-service:
+        slidingWindowSize: 10
+        failureRateThreshold: 80
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 5
+        minimumNumberOfCalls: 5
+      post-service:
+        slidingWindowSize: 10
+        failureRateThreshold: 80
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 5
+        minimumNumberOfCalls: 5
+      product-service:
+        slidingWindowSize: 10
+        failureRateThreshold: 80
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 5
+        minimumNumberOfCalls: 5
+      social-service:
+        slidingWindowSize: 10
+        failureRateThreshold: 80
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 5
+        minimumNumberOfCalls: 5
+      analytics-service:
+        slidingWindowSize: 10
+        failureRateThreshold: 80
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 5
+        minimumNumberOfCalls: 5
+      notification-service:
+        slidingWindowSize: 10
+        failureRateThreshold: 80
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 5
+        minimumNumberOfCalls: 5
+      feed-service:
+        slidingWindowSize: 10
+        failureRateThreshold: 80
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 5
+        minimumNumberOfCalls: 5
+      interaction-service:
+        slidingWindowSize: 10
+        failureRateThreshold: 80
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 5
+        minimumNumberOfCalls: 5
+  timelimiter:
+    instances:
+      user-service:
+        timeoutDuration: 30s
+      post-service:
+        timeoutDuration: 30s
+      product-service:
+        timeoutDuration: 30s
+      social-service:
+        timeoutDuration: 30s
+      analytics-service:
+        timeoutDuration: 30s
+      notification-service:
+        timeoutDuration: 30s
+      feed-service:
+        timeoutDuration: 30s
+      interaction-service:
+        timeoutDuration: 30s
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,circuitbreakers
+  endpoint:
+    health:
+      show-details: always
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_URL:http://localhost:9411/api/v2/spans}
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    urls:
+      - name: user-service
+        url: /user-service/v3/api-docs
+      - name: post-service
+        url: /post-service/v3/api-docs
+      - name: product-service
+        url: /product-service/v3/api-docs
+      - name: social-service
+        url: /social-service/v3/api-docs
+      - name: analytics-service
+        url: /analytics-service/v3/api-docs
+      - name: notification-service
+        url: /notification-service/v3/api-docs
+      - name: feed-service
+        url: /feed-service/v3/api-docs
+      - name: interaction-service
+        url: /interaction-service/v3/api-docs

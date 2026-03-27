@@ -1,0 +1,94 @@
+<div class="container">
+  <div class="search-layout">
+    <div class="card">
+      <h1 class="card-header">Search</h1>
+
+      <!-- Search Form -->
+      <div class="search-form">
+        <div class="search-type-selector">
+          <button
+            class="type-btn"
+            [class.active]="searchType === 'users'"
+            (click)="searchType = 'users'"
+          >
+            Users
+          </button>
+          <button
+            class="type-btn"
+            [class.active]="searchType === 'posts'"
+            (click)="searchType = 'posts'"
+          >
+            Posts
+          </button>
+          <button
+            class="type-btn"
+            [class.active]="searchType === 'hashtags'"
+            (click)="searchType = 'hashtags'"
+          >
+            Hashtags
+          </button>
+        </div>
+
+        <div class="search-input-group">
+          <input
+            type="text"
+            class="form-control"
+            [(ngModel)]="searchQuery"
+            (keyup.enter)="search()"
+            [placeholder]="'Search ' + searchType + '...'"
+          />
+          <button (click)="search()" class="btn btn-primary">
+            Search
+          </button>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div *ngIf="isLoading" class="text-center">
+        <div class="spinner"></div>
+        <p>Searching...</p>
+      </div>
+
+      <!-- Results -->
+      <div *ngIf="!isLoading && hasSearched">
+        <!-- User Results -->
+        <div *ngIf="searchType === 'users'">
+          <div *ngIf="users.length === 0" class="empty-state">
+            No users found
+          </div>
+
+          <div class="user-results">
+            <div *ngFor="let user of users" class="user-item">
+              <div class="user-avatar">{{ (user.name || 'U').charAt(0).toUpperCase() }}</div>
+              <div class="user-info">
+                <a [routerLink]="['/profile', user.id]" class="user-name">
+                  {{ user.name }}
+                </a>
+                <p class="user-meta">&#64;{{ user.username }} &middot; {{ user.email }}</p>
+                <span class="user-badge">{{ user.role }}</span>
+              </div>
+              <a [routerLink]="['/profile', user.id]" class="btn btn-secondary btn-sm">
+                View Profile
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Post Results -->
+        <div *ngIf="searchType === 'posts' || searchType === 'hashtags'">
+          <div *ngIf="posts.length === 0" class="empty-state">
+            No posts found
+          </div>
+
+          <div class="post-results">
+            <app-post-card
+              *ngFor="let post of posts"
+              [post]="post"
+              (postDeleted)="onPostDeleted($event)"
+            ></app-post-card>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

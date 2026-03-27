@@ -1,0 +1,508 @@
+﻿<div class="container" *ngIf="user; else loading">
+  <div class="profile-layout">
+
+    <!-- Profile Card -->
+    <div class="card profile-card">
+      <div class="alert alert-success" *ngIf="successMessage">{{ successMessage }}</div>
+      <div class="alert alert-error" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+      <div class="profile-header">
+        <div class="profile-avatar-wrap">
+          <div class="profile-avatar" *ngIf="!avatarUrl">
+            {{ (user.name || 'U').charAt(0).toUpperCase() }}
+          </div>
+          <img *ngIf="avatarUrl" [src]="avatarUrl" alt="Profile" class="profile-avatar profile-avatar-img" />
+          <button *ngIf="isOwnProfile" class="avatar-edit-btn" (click)="avatarInput.click()" title="Change photo">
+            <i class="fa-solid fa-camera"></i>
+          </button>
+          <input #avatarInput type="file" accept="image/*" style="display:none" (change)="onAvatarChange($event)" />
+        </div>
+        <div class="profile-info">
+          <ng-container *ngIf="!isEditing">
+            <h1>{{ user.name }}</h1>
+            <p class="profile-display-name" *ngIf="user.role === 'CREATOR' && creatorProfile?.creatorName">
+              {{ creatorProfile!.creatorName }}
+            </p>
+            <p class="profile-display-name" *ngIf="user.role === 'BUSINESS' && businessProfile?.companyName">
+              {{ businessProfile!.companyName }}
+            </p>
+            <p class="profile-username">&#64;{{ user.username }}</p>
+            <p class="profile-email">{{ user.email }}</p>
+            <div class="badges">
+              <span class="badge badge-role badge-role-{{ user.role | lowercase }}">{{ user.role }}</span>
+              <span class="badge" [class.badge-public]="user.accountPrivacy === 'PUBLIC'" [class.badge-private]="user.accountPrivacy === 'PRIVATE'">
+                {{ user.accountPrivacy }}
+              </span>
+              <span class="badge badge-category" *ngIf="user.role === 'CREATOR' && creatorProfile?.contentCategory">
+                {{ creatorProfile!.contentCategory }}
+              </span>
+              <span class="badge badge-category" *ngIf="user.role === 'BUSINESS' && businessProfile?.industry">
+                {{ businessProfile!.industry }}
+              </span>
+            </div>
+          </ng-container>
+          <ng-container *ngIf="isEditing">
+            <div class="form-group">
+              <label>Full Name</label>
+              <input type="text" class="form-control" [(ngModel)]="editForm.name" />
+            </div>
+            <div class="form-group">
+              <label>Account Privacy</label>
+              <select class="form-control" [(ngModel)]="editForm.accountPrivacy">
+                <option value="PUBLIC">Public</option>
+                <option value="PRIVATE">Private</option>
+              </select>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+
+      <div class="profile-stats">
+        <div class="stat"><div class="stat-value">{{ followersCount }}</div><div class="stat-label">Followers</div></div>
+        <div class="stat"><div class="stat-value">{{ followingCount }}</div><div class="stat-label">Following</div></div>
+        <div class="stat" *ngIf="user.role === 'CREATOR' && creatorProfile?.subscriberCount">
+          <div class="stat-value">{{ creatorProfile!.subscriberCount | number }}</div>
+          <div class="stat-label">Subscribers</div>
+        </div>
+      </div>
+
+      <div class="profile-actions">
+        <ng-container *ngIf="isOwnProfile">
+          <button *ngIf="!isEditing" (click)="startEdit()" class="btn btn-primary">Edit Profile</button>
+          <button *ngIf="isOwnProfile && !isEditing" (click)="showChangePassword = !showChangePassword" class="btn btn-secondary">
+            <i class="fa-solid fa-lock"></i> Change Password
+          </button>
+          <ng-container *ngIf="isEditing">
+            <button (click)="saveProfile()" class="btn btn-success" [disabled]="isLoading">
+              {{ isLoading ? 'Saving...' : 'Save Changes' }}
+            </button>
+            <button (click)="cancelEdit()" class="btn btn-secondary">Cancel</button>
+          </ng-container>
+        </ng-container>
+        <ng-container *ngIf="!isOwnProfile">
+          <button *ngIf="followStatus === 'NONE'" (click)="followUser()" class="btn btn-primary">Follow</button>
+          <button *ngIf="followStatus === 'PENDING'" class="btn btn-secondary" disabled>Requested</button>
+          <button *ngIf="followStatus === 'ACCEPTED'" (click)="unfollowUser()" class="btn btn-secondary">Unfollow</button>
+          <!-- Connect only for CREATOR/BUSINESS profiles -->
+          <button *ngIf="user.role !== 'USER' && connectionStatus === 'NONE'" (click)="sendConnectionRequest()" class="btn btn-outline">Connect</button>
+          <span *ngIf="user.role !== 'USER' && connectionStatus === 'PENDING'" class="badge badge-public">Request Sent</span>
+          <span *ngIf="user.role !== 'USER' && connectionStatus === 'ACCEPTED'" class="badge badge-public"><i class="fa-solid fa-check"></i> Connected</span>
+        </ng-container>
+      </div>
+
+      <!-- Change Password Panel -->
+      <div class="change-password-panel" *ngIf="isOwnProfile && showChangePassword">
+        <h4 class="cp-title">Change Password</h4>
+        <div class="alert alert-error" *ngIf="pwError">{{ pwError }}</div>
+        <div class="alert alert-success" *ngIf="pwSuccess">{{ pwSuccess }}</div>
+        <div class="form-group">
+          <label>Current Password</label>
+          <input type="password" class="form-control" [(ngModel)]="pwForm.currentPassword" placeholder="Enter current password" />
+        </div>
+        <div class="form-group">
+          <label>New Password</label>
+          <input type="password" class="form-control" [(ngModel)]="pwForm.newPassword" placeholder="Min 8 characters" />
+        </div>
+        <div class="form-group">
+          <label>Confirm New Password</label>
+          <input type="password" class="form-control" [(ngModel)]="pwForm.confirmPassword" placeholder="Repeat new password" />
+        </div>
+        <div class="cp-actions">
+          <button class="btn btn-primary" (click)="submitChangePassword()" [disabled]="pwLoading">
+            {{ pwLoading ? 'Saving...' : 'Update Password' }}
+          </button>
+          <button class="btn btn-secondary" (click)="showChangePassword = false; pwError = ''; pwSuccess = ''">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="profile-tabs">
+      <button class="tab-btn" [class.active]="activeTab === 'about'" (click)="switchTab('about')">About</button>
+      <button class="tab-btn" [class.active]="activeTab === 'posts'" (click)="switchTab('posts')">Posts</button>
+    </div>
+
+    <!-- ABOUT TAB -->
+    <div *ngIf="activeTab === 'about'">
+
+      <!-- Basic Info -->
+      <div class="card profile-card">
+        <div class="profile-section">
+          <h3 class="section-title">About</h3>
+          <ng-container *ngIf="!isEditing">
+            <p class="bio-text" *ngIf="user.bio">{{ user.bio }}</p>
+            <p class="bio-text empty" *ngIf="!user.bio && isOwnProfile">No bio yet — click Edit Profile to add one.</p>
+            <div class="detail-row" *ngIf="user.location"><i class="fa-solid fa-location-dot detail-icon"></i> {{ user.location }}</div>
+            <div class="detail-row" *ngIf="user.website">
+              <i class="fa-solid fa-link detail-icon"></i>
+              <a [href]="user.website" target="_blank" rel="noopener">{{ user.website }}</a>
+            </div>
+            <div class="detail-row" *ngIf="user.createdAt">
+              <i class="fa-regular fa-calendar detail-icon"></i> Joined {{ user.createdAt | date:'MMMM yyyy' }}
+            </div>
+          </ng-container>
+          <ng-container *ngIf="isEditing">
+            <div class="form-group">
+              <label>Bio</label>
+              <textarea class="form-control" [(ngModel)]="editForm.bio" rows="3" placeholder="Tell people about yourself..."></textarea>
+            </div>
+            <div class="form-group">
+              <label>Location</label>
+              <input type="text" class="form-control" [(ngModel)]="editForm.location" placeholder="City, Country" />
+            </div>
+            <div class="form-group">
+              <label>Website</label>
+              <input type="url" class="form-control" [(ngModel)]="editForm.website" placeholder="https://yourwebsite.com" />
+            </div>
+          </ng-container>
+        </div>
+      </div>
+
+      <!-- CREATOR ENHANCED PROFILE -->
+      <ng-container *ngIf="user.role === 'CREATOR'">
+
+        <div class="card profile-card">
+          <div class="profile-section">
+            <h3 class="section-title"><i class="fa-solid fa-palette"></i> Creator Profile</h3>
+            <ng-container *ngIf="!isEditing">
+              <div class="detail-row" *ngIf="creatorProfile?.creatorName"><i class="fa-solid fa-star detail-icon"></i> <strong>{{ creatorProfile!.creatorName }}</strong></div>
+              <div class="detail-row" *ngIf="creatorProfile?.contentCategory"><span class="detail-icon">🎯</span> {{ creatorProfile!.contentCategory }}</div>
+              <p class="bio-text" *ngIf="creatorProfile?.detailedBio" style="margin-top:8px">{{ creatorProfile!.detailedBio }}</p>
+              <div class="detail-row" *ngIf="creatorProfile?.contactEmail"><i class="fa-solid fa-envelope detail-icon"></i> {{ creatorProfile!.contactEmail }}</div>
+              <div class="detail-row" *ngIf="creatorProfile?.contactPhone"><i class="fa-solid fa-phone detail-icon"></i> {{ creatorProfile!.contactPhone }}</div>
+              <div class="detail-row" *ngIf="creatorProfile?.websiteUrl">
+                <i class="fa-solid fa-globe detail-icon"></i>
+                <a [href]="creatorProfile!.websiteUrl" target="_blank" rel="noopener">{{ creatorProfile!.websiteUrl }}</a>
+              </div>
+              <div class="detail-row" *ngIf="creatorProfile?.portfolioUrl">
+                <i class="fa-solid fa-video detail-icon"></i>
+                <a [href]="creatorProfile!.portfolioUrl" target="_blank" rel="noopener">Portfolio / Channel</a>
+              </div>
+              <p class="empty" *ngIf="!creatorProfile && isOwnProfile">No creator details yet — click Edit Profile.</p>
+            </ng-container>
+            <ng-container *ngIf="isEditing">
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Creator / Display Name</label>
+                  <input type="text" class="form-control" [(ngModel)]="editCreator.creatorName" placeholder="Your creator brand name" />
+                </div>
+                <div class="form-group">
+                  <label>Content Category</label>
+                  <input type="text" class="form-control" [(ngModel)]="editCreator.contentCategory" placeholder="e.g. Tech, Lifestyle, Gaming" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Detailed Bio</label>
+                <textarea class="form-control" [(ngModel)]="editCreator.detailedBio" rows="4" placeholder="Describe your content, audience, and what makes you unique..."></textarea>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Contact Email</label>
+                  <input type="email" class="form-control" [(ngModel)]="editCreator.contactEmail" placeholder="business@email.com" />
+                </div>
+                <div class="form-group">
+                  <label>Contact Phone</label>
+                  <input type="tel" class="form-control" [(ngModel)]="editCreator.contactPhone" placeholder="+1 234 567 8900" />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Website URL</label>
+                  <input type="url" class="form-control" [(ngModel)]="editCreator.websiteUrl" placeholder="https://yoursite.com" />
+                </div>
+                <div class="form-group">
+                  <label>Portfolio / Channel URL</label>
+                  <input type="url" class="form-control" [(ngModel)]="editCreator.portfolioUrl" placeholder="https://youtube.com/@channel" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Subscriber Count</label>
+                <input type="number" class="form-control" [(ngModel)]="editCreator.subscriberCount" min="0" placeholder="0" />
+              </div>
+            </ng-container>
+          </div>
+        </div>
+
+        <!-- Creator Social Links -->
+        <div class="card profile-card">
+          <div class="profile-section">
+            <h3 class="section-title"><i class="fa-solid fa-mobile-screen"></i> Social Media</h3>
+            <ng-container *ngIf="!isEditing">
+              <div *ngIf="(creatorProfile?.parsedSocialLinks || []).length === 0" class="empty">No social links added yet.</div>
+              <div class="links-grid">
+                <a *ngFor="let link of creatorProfile?.parsedSocialLinks || []"
+                   [href]="link.url" target="_blank" rel="noopener" class="social-link-chip">
+                  <span class="social-platform">{{ link.platform }}</span>
+                  <span class="social-url">{{ link.url }}</span>
+                </a>
+              </div>
+            </ng-container>
+            <ng-container *ngIf="isEditing">
+              <div class="link-list">
+                <div *ngFor="let link of editCreator.parsedSocialLinks || []; let i = index" class="link-item">
+                  <span class="link-platform">{{ link.platform }}</span>
+                  <span class="link-url">{{ link.url }}</span>
+                  <button class="btn-remove-link" (click)="removeCreatorSocialLink(i)">✕</button>
+                </div>
+              </div>
+              <div class="add-link-row">
+                <select class="form-control form-control-sm" [(ngModel)]="newSocialLink.platform">
+                  <option value="">Platform</option>
+                  <option *ngFor="let p of socialPlatforms" [value]="p">{{ p }}</option>
+                </select>
+                <input type="url" class="form-control form-control-sm" [(ngModel)]="newSocialLink.url" placeholder="https://..." />
+                <button class="btn btn-outline btn-sm" (click)="addCreatorSocialLink()"
+                  [disabled]="!newSocialLink.platform || !newSocialLink.url">+ Add</button>
+              </div>
+            </ng-container>
+          </div>
+        </div>
+
+        <!-- Creator External Links -->
+        <div class="card profile-card">
+          <div class="profile-section">
+            <h3 class="section-title"><i class="fa-solid fa-handshake"></i> Endorsements & Partnerships</h3>
+            <ng-container *ngIf="!isEditing">
+              <div *ngIf="(creatorProfile?.parsedExternalLinks || []).length === 0" class="empty">No endorsements added yet.</div>
+              <div class="links-grid">
+                <a *ngFor="let link of creatorProfile?.parsedExternalLinks || []"
+                   [href]="link.url" target="_blank" rel="noopener" class="external-link-chip">
+                  <span class="link-label">{{ link.label }}</span>
+                  <span class="link-arrow">→</span>
+                </a>
+              </div>
+            </ng-container>
+            <ng-container *ngIf="isEditing">
+              <div class="link-list">
+                <div *ngFor="let link of editCreator.parsedExternalLinks || []; let i = index" class="link-item">
+                  <span class="link-platform">{{ link.label }}</span>
+                  <span class="link-url">{{ link.url }}</span>
+                  <button class="btn-remove-link" (click)="removeCreatorExternalLink(i)">✕</button>
+                </div>
+              </div>
+              <div class="add-link-row">
+                <input type="text" class="form-control form-control-sm" [(ngModel)]="newExternalLink.label" placeholder="Label (e.g. Nike Partnership)" />
+                <input type="url" class="form-control form-control-sm" [(ngModel)]="newExternalLink.url" placeholder="https://..." />
+                <button class="btn btn-outline btn-sm" (click)="addCreatorExternalLink()"
+                  [disabled]="!newExternalLink.label || !newExternalLink.url">+ Add</button>
+              </div>
+            </ng-container>
+          </div>
+        </div>
+
+      </ng-container>
+
+      <!-- BUSINESS ENHANCED PROFILE -->
+      <ng-container *ngIf="user.role === 'BUSINESS'">
+
+        <div class="card profile-card">
+          <div class="profile-section">
+            <h3 class="section-title"><i class="fa-solid fa-building"></i> Business Profile</h3>
+            <ng-container *ngIf="!isEditing">
+              <div class="detail-row" *ngIf="businessProfile?.companyName"><i class="fa-solid fa-building detail-icon"></i> <strong>{{ businessProfile!.companyName }}</strong></div>
+              <div class="detail-row" *ngIf="businessProfile?.industry"><i class="fa-solid fa-industry detail-icon"></i> {{ businessProfile!.industry }}</div>
+              <div class="detail-row" *ngIf="businessProfile?.companySize"><i class="fa-solid fa-user-group detail-icon"></i> {{ businessProfile!.companySize }} employees</div>
+              <p class="bio-text" *ngIf="businessProfile?.description" style="margin-top:8px">{{ businessProfile!.description }}</p>
+              <div class="detail-row" *ngIf="businessProfile?.contactEmail"><i class="fa-solid fa-envelope detail-icon"></i> {{ businessProfile!.contactEmail }}</div>
+              <div class="detail-row" *ngIf="businessProfile?.phoneNumber"><i class="fa-solid fa-phone detail-icon"></i> {{ businessProfile!.phoneNumber }}</div>
+              <div class="detail-row" *ngIf="businessProfile?.websiteUrl">
+                <i class="fa-solid fa-globe detail-icon"></i>
+                <a [href]="businessProfile!.websiteUrl" target="_blank" rel="noopener">{{ businessProfile!.websiteUrl }}</a>
+              </div>
+              <p class="empty" *ngIf="!businessProfile && isOwnProfile">No business details yet — click Edit Profile.</p>
+            </ng-container>
+            <ng-container *ngIf="isEditing">
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Company / Business Name</label>
+                  <input type="text" class="form-control" [(ngModel)]="editBusiness.companyName" placeholder="Acme Corp" />
+                </div>
+                <div class="form-group">
+                  <label>Industry</label>
+                  <input type="text" class="form-control" [(ngModel)]="editBusiness.industry" placeholder="e.g. Technology, Retail" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Company Size</label>
+                <select class="form-control" [(ngModel)]="editBusiness.companySize">
+                  <option value="">Select size</option>
+                  <option value="1-10">1–10</option>
+                  <option value="11-50">11–50</option>
+                  <option value="51-200">51–200</option>
+                  <option value="201-500">201–500</option>
+                  <option value="500+">500+</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Business Description</label>
+                <textarea class="form-control" [(ngModel)]="editBusiness.description" rows="4" placeholder="Describe your business, products, and services..."></textarea>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Contact Email</label>
+                  <input type="email" class="form-control" [(ngModel)]="editBusiness.contactEmail" placeholder="contact@company.com" />
+                </div>
+                <div class="form-group">
+                  <label>Phone Number</label>
+                  <input type="tel" class="form-control" [(ngModel)]="editBusiness.phoneNumber" placeholder="+1 234 567 8900" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Website URL</label>
+                <input type="url" class="form-control" [(ngModel)]="editBusiness.websiteUrl" placeholder="https://company.com" />
+              </div>
+            </ng-container>
+          </div>
+        </div>
+
+        <!-- Business Address -->
+        <div class="card profile-card">
+          <div class="profile-section">
+            <h3 class="section-title"><i class="fa-solid fa-location-dot"></i> Business Address</h3>
+            <ng-container *ngIf="!isEditing">
+              <div *ngIf="!businessProfile?.businessAddress && !businessProfile?.city" class="empty">No address added yet.</div>
+              <div class="detail-row" *ngIf="businessProfile?.businessAddress"><i class="fa-solid fa-house detail-icon"></i> {{ businessProfile!.businessAddress }}</div>
+              <div class="detail-row" *ngIf="businessProfile?.city || businessProfile?.country">
+                <i class="fa-solid fa-earth-asia detail-icon"></i>
+                {{ businessProfile!.city }}<span *ngIf="businessProfile!.city && businessProfile!.country">, </span>{{ businessProfile!.country }}
+              </div>
+            </ng-container>
+            <ng-container *ngIf="isEditing">
+              <div class="form-group">
+                <label>Street Address</label>
+                <input type="text" class="form-control" [(ngModel)]="editBusiness.businessAddress" placeholder="123 Main Street, Suite 100" />
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>City</label>
+                  <input type="text" class="form-control" [(ngModel)]="editBusiness.city" placeholder="New York" />
+                </div>
+                <div class="form-group">
+                  <label>Country</label>
+                  <input type="text" class="form-control" [(ngModel)]="editBusiness.country" placeholder="United States" />
+                </div>
+              </div>
+            </ng-container>
+          </div>
+        </div>
+
+        <!-- Business Hours -->
+        <div class="card profile-card">
+          <div class="profile-section">
+            <h3 class="section-title"><i class="fa-regular fa-clock"></i> Business Hours</h3>
+            <ng-container *ngIf="!isEditing">
+              <div *ngIf="parsedBusinessHoursEntries(businessProfile?.businessHours).length === 0" class="empty">No business hours added yet.</div>
+              <div class="hours-grid">
+                <div *ngFor="let entry of parsedBusinessHoursEntries(businessProfile?.businessHours)" class="hours-row">
+                  <span class="hours-day">{{ entry.day }}</span>
+                  <span class="hours-time">{{ entry.hours }}</span>
+                </div>
+              </div>
+            </ng-container>
+            <ng-container *ngIf="isEditing">
+              <p class="hint">Leave blank for days you are closed.</p>
+              <div class="hours-edit-grid">
+                <div *ngFor="let day of daysOfWeek" class="hours-edit-row">
+                  <span class="hours-day-label">{{ day }}</span>
+                  <input type="text" class="form-control form-control-sm"
+                    [value]="getBusinessHour(day)"
+                    (input)="setBusinessHour(day, $any($event.target).value)"
+                    placeholder="e.g. 9am-5pm or Closed" />
+                </div>
+              </div>
+            </ng-container>
+          </div>
+        </div>
+
+        <!-- Business Social Links -->
+        <div class="card profile-card">
+          <div class="profile-section">
+            <h3 class="section-title"><i class="fa-solid fa-mobile-screen"></i> Social Media</h3>
+            <ng-container *ngIf="!isEditing">
+              <div *ngIf="(businessProfile?.parsedSocialLinks || []).length === 0" class="empty">No social links added yet.</div>
+              <div class="links-grid">
+                <a *ngFor="let link of businessProfile?.parsedSocialLinks || []"
+                   [href]="link.url" target="_blank" rel="noopener" class="social-link-chip">
+                  <span class="social-platform">{{ link.platform }}</span>
+                  <span class="social-url">{{ link.url }}</span>
+                </a>
+              </div>
+            </ng-container>
+            <ng-container *ngIf="isEditing">
+              <div class="link-list">
+                <div *ngFor="let link of editBusiness.parsedSocialLinks || []; let i = index" class="link-item">
+                  <span class="link-platform">{{ link.platform }}</span>
+                  <span class="link-url">{{ link.url }}</span>
+                  <button class="btn-remove-link" (click)="removeBizSocialLink(i)">✕</button>
+                </div>
+              </div>
+              <div class="add-link-row">
+                <select class="form-control form-control-sm" [(ngModel)]="newBizSocialLink.platform">
+                  <option value="">Platform</option>
+                  <option *ngFor="let p of socialPlatforms" [value]="p">{{ p }}</option>
+                </select>
+                <input type="url" class="form-control form-control-sm" [(ngModel)]="newBizSocialLink.url" placeholder="https://..." />
+                <button class="btn btn-outline btn-sm" (click)="addBizSocialLink()"
+                  [disabled]="!newBizSocialLink.platform || !newBizSocialLink.url">+ Add</button>
+              </div>
+            </ng-container>
+          </div>
+        </div>
+
+        <!-- Business External Links -->
+        <div class="card profile-card">
+          <div class="profile-section">
+            <h3 class="section-title"><i class="fa-solid fa-handshake"></i> Partnerships & Endorsements</h3>
+            <ng-container *ngIf="!isEditing">
+              <div *ngIf="(businessProfile?.parsedExternalLinks || []).length === 0" class="empty">No partnerships added yet.</div>
+              <div class="links-grid">
+                <a *ngFor="let link of businessProfile?.parsedExternalLinks || []"
+                   [href]="link.url" target="_blank" rel="noopener" class="external-link-chip">
+                  <span class="link-label">{{ link.label }}</span>
+                  <span class="link-arrow">→</span>
+                </a>
+              </div>
+            </ng-container>
+            <ng-container *ngIf="isEditing">
+              <div class="link-list">
+                <div *ngFor="let link of editBusiness.parsedExternalLinks || []; let i = index" class="link-item">
+                  <span class="link-platform">{{ link.label }}</span>
+                  <span class="link-url">{{ link.url }}</span>
+                  <button class="btn-remove-link" (click)="removeBizExternalLink(i)">✕</button>
+                </div>
+              </div>
+              <div class="add-link-row">
+                <input type="text" class="form-control form-control-sm" [(ngModel)]="newBizExternalLink.label" placeholder="Label (e.g. Official Partner)" />
+                <input type="url" class="form-control form-control-sm" [(ngModel)]="newBizExternalLink.url" placeholder="https://..." />
+                <button class="btn btn-outline btn-sm" (click)="addBizExternalLink()"
+                  [disabled]="!newBizExternalLink.label || !newBizExternalLink.url">+ Add</button>
+              </div>
+            </ng-container>
+          </div>
+        </div>
+
+      </ng-container>
+
+    </div>
+
+    <!-- Posts Tab -->
+    <div *ngIf="activeTab === 'posts'" class="posts-tab">
+      <p *ngIf="posts.length === 0" class="empty-posts">No posts yet.</p>
+      <app-post-card
+        *ngFor="let post of posts"
+        [post]="post"
+        (postDeleted)="onPostDeleted($event)"
+        (postUpdated)="onPostUpdated($event)">
+      </app-post-card>
+    </div>
+
+  </div>
+</div>
+
+<ng-template #loading>
+  <div class="container" style="text-align:center;padding:60px">
+    <div class="spinner"></div>
+    <p *ngIf="errorMessage" style="color:#e74c3c;margin-top:16px">{{ errorMessage }}</p>
+  </div>
+</ng-template>
+

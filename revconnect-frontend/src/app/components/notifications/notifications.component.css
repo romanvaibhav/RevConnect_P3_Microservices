@@ -1,0 +1,158 @@
+.container { max-width: 680px; margin: 24px auto; padding: 0 16px; }
+.notif-layout { display: flex; flex-direction: column; gap: 0; }
+
+/* Header */
+.notif-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 4px; flex-wrap: wrap; gap: 8px;
+}
+.header-left { display: flex; align-items: center; gap: 10px; }
+.page-title { font-size: 22px; font-weight: 700; margin: 0; color: #fff; }
+.unread-pill {
+  background: linear-gradient(90deg, #667eea, #764ba2);
+  color: #fff; font-size: 12px; font-weight: 700;
+  padding: 2px 10px; border-radius: 12px;
+}
+
+/* Tabs */
+.tabs-bar {
+  display: flex; gap: 2px;
+  border-radius: 10px 10px 0 0;
+  border: 1px solid rgba(255,255,255,0.10); border-bottom: none;
+  padding: 8px 8px 0; margin-top: 12px;
+  background: rgba(255,255,255,0.04);
+}
+.tab-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 10px 16px; border: none; background: none;
+  cursor: pointer; font-size: 14px; font-weight: 500;
+  color: rgba(255,255,255,0.50); border-bottom: 2px solid transparent;
+  margin-bottom: -1px; border-radius: 6px 6px 0 0;
+  transition: color 0.15s, background 0.15s;
+}
+.tab-btn:hover:not(.active) { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.85); }
+.tab-btn.active { color: #a5b4fc; border-bottom-color: #667eea; font-weight: 600; }
+.tab-count {
+  background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.55);
+  font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 10px;
+}
+.tab-count.has-items { background: linear-gradient(90deg, #667eea, #764ba2); color: #fff; }
+
+/* Loading */
+.loading-state { text-align: center; padding: 48px; color: rgba(255,255,255,0.40); }
+.spinner {
+  width: 32px; height: 32px;
+  border: 3px solid rgba(255,255,255,0.10);
+  border-top-color: #667eea; border-radius: 50%;
+  animation: spin 0.8s linear infinite; margin: 0 auto 12px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Notification list */
+.notif-list-wrap {
+  border-radius: 0 0 10px 10px;
+  border: 1px solid rgba(255,255,255,0.10);
+  overflow: hidden; min-height: 120px;
+  background: rgba(255,255,255,0.04);
+}
+
+/* Empty state */
+.empty-state {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 10px; padding: 56px 20px; color: rgba(255,255,255,0.40); text-align: center;
+}
+.empty-icon { font-size: 40px; }
+.empty-state p { margin: 0; font-size: 15px; }
+
+/* Notification items */
+.notif-list { display: flex; flex-direction: column; }
+
+.notif-item {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 14px 16px; cursor: pointer;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  transition: background 0.15s; position: relative;
+}
+.notif-item:last-child { border-bottom: none; }
+.notif-item:hover { background: rgba(255,255,255,0.05); }
+.notif-item.unread { background: rgba(102,126,234,0.10); }
+.notif-item.unread:hover { background: rgba(102,126,234,0.15); }
+
+.notif-icon-wrap {
+  width: 42px; height: 42px; border-radius: 50%; flex-shrink: 0;
+  background: rgba(255,255,255,0.08);
+  display: flex; align-items: center; justify-content: center; font-size: 20px;
+}
+
+.notif-body { flex: 1; min-width: 0; }
+.notif-message { margin: 0 0 4px; font-size: 14px; color: rgba(255,255,255,0.85); line-height: 1.4; }
+.notif-item.unread .notif-message { font-weight: 600; color: #fff; }
+.notif-meta { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+.notif-type-label { font-size: 12px; color: #a5b4fc; font-weight: 500; }
+.notif-dot { color: rgba(255,255,255,0.25); font-size: 12px; }
+.notif-time { font-size: 12px; color: rgba(255,255,255,0.35); }
+
+.notif-right { display: flex; flex-direction: column; align-items: center; gap: 6px; flex-shrink: 0; }
+.unread-dot { width: 10px; height: 10px; border-radius: 50%; background: #667eea; flex-shrink: 0; }
+.btn-delete {
+  background: none; border: none; cursor: pointer;
+  color: rgba(255,255,255,0.25); font-size: 18px; line-height: 1;
+  padding: 0 2px; opacity: 0; transition: opacity 0.15s, color 0.15s;
+}
+.notif-item:hover .btn-delete { opacity: 1; }
+.btn-delete:hover { color: #f87171; }
+
+/* Preferences */
+.prefs-card {
+  border-radius: 0 0 10px 10px;
+  border: 1px solid rgba(255,255,255,0.10);
+  padding: 24px; background: rgba(255,255,255,0.04);
+}
+.prefs-title { font-size: 17px; font-weight: 700; margin: 0 0 6px; color: #fff; }
+.prefs-desc { font-size: 14px; color: rgba(255,255,255,0.45); margin: 0 0 20px; }
+
+.prefs-list { display: flex; flex-direction: column; gap: 0; }
+.pref-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.06); cursor: pointer;
+}
+.pref-row:last-child { border-bottom: none; }
+.pref-left { display: flex; align-items: center; gap: 12px; }
+.pref-icon { font-size: 20px; width: 28px; text-align: center; }
+.pref-label { font-size: 15px; color: rgba(255,255,255,0.80); font-weight: 500; }
+
+/* Toggle */
+.toggle-wrap { position: relative; }
+.toggle-input { position: absolute; opacity: 0; width: 0; height: 0; }
+.toggle-track {
+  display: block; width: 44px; height: 24px;
+  background: rgba(255,255,255,0.15); border-radius: 12px;
+  cursor: pointer; transition: background 0.2s; position: relative;
+}
+.toggle-input:checked + .toggle-track { background: linear-gradient(90deg, #667eea, #764ba2); }
+.toggle-thumb {
+  position: absolute; top: 2px; left: 2px;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: #fff; transition: transform 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+.toggle-input:checked + .toggle-track .toggle-thumb { transform: translateX(20px); }
+
+.prefs-actions { display: flex; align-items: center; gap: 12px; margin-top: 20px; }
+.save-confirm { font-size: 14px; color: #6ee7b7; font-weight: 500; }
+
+/* Buttons */
+.btn { padding: 8px 18px; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+.btn-primary { background: linear-gradient(90deg, #667eea, #764ba2); color: #fff; }
+.btn-primary:hover { opacity: 0.88; }
+.btn-ghost { background: none; color: #a5b4fc; border: 1px solid rgba(102,126,234,0.40); }
+.btn-ghost:hover { background: rgba(102,126,234,0.12); }
+.btn-sm { padding: 6px 12px; font-size: 12px; }
+
+@media (max-width: 600px) {
+  .container { padding: 0 8px; }
+  .tabs-bar { padding: 6px 4px 0; }
+  .tab-btn { padding: 8px 10px; font-size: 12px; }
+  .notif-item { padding: 12px; }
+  .btn-delete { opacity: 1; }
+}

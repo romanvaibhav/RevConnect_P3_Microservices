@@ -1,0 +1,125 @@
+<div class="profile-setup-container">
+  <div class="profile-setup-card">
+    <h1 class="setup-title">Complete Your Profile</h1>
+    <p class="setup-subtitle">
+      <span *ngIf="userRole === 'USER'">Personal User</span>
+      <span *ngIf="userRole === 'CREATOR'">Creator Account</span>
+      <span *ngIf="userRole === 'BUSINESS'">Business Account</span>
+    </p>
+
+    <div class="alert alert-success" *ngIf="successMessage">{{ successMessage }}</div>
+    <div class="alert alert-error" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+    <form (ngSubmit)="onSubmit()" class="profile-form">
+
+      <!-- ── Basic fields (all roles) ── -->
+      <div class="section-label">Basic Info</div>
+
+      <div class="form-group">
+        <label>Full Name *</label>
+        <input type="text" class="form-control" [(ngModel)]="basicProfile.name" name="name" required placeholder="Your full name" />
+      </div>
+
+      <div class="form-group">
+        <label>Bio / About</label>
+        <textarea class="form-control" [(ngModel)]="basicProfile.bio" name="bio" rows="3" placeholder="Tell people about yourself..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Location</label>
+        <input type="text" class="form-control" [(ngModel)]="basicProfile.location" name="location" placeholder="City, Country" />
+      </div>
+
+      <div class="form-group">
+        <label>Website</label>
+        <input type="url" class="form-control" [(ngModel)]="basicProfile.website" name="website" placeholder="https://yourwebsite.com" />
+      </div>
+
+      <div class="form-group">
+        <label>Account Privacy</label>
+        <select class="form-control" [(ngModel)]="basicProfile.accountPrivacy" name="accountPrivacy">
+          <option value="PUBLIC">Public — anyone can view your profile</option>
+          <option value="PRIVATE">Private — only connections can view</option>
+        </select>
+      </div>
+
+      <!-- ── Creator-specific fields ── -->
+      <ng-container *ngIf="userRole === 'CREATOR'">
+        <div class="section-label">Creator Details</div>
+
+        <div class="form-group">
+          <label>Content Category</label>
+          <input type="text" class="form-control" [(ngModel)]="creatorProfile.contentCategory" name="contentCategory"
+            placeholder="e.g., Tech, Lifestyle, Gaming, Art" />
+        </div>
+
+        <div class="form-group">
+          <label>Portfolio / Channel URL</label>
+          <input type="url" class="form-control" [(ngModel)]="creatorProfile.portfolioUrl" name="portfolioUrl"
+            placeholder="https://youtube.com/@yourchannel" />
+        </div>
+
+        <div class="form-group">
+          <label>Subscriber / Follower Count</label>
+          <input type="number" class="form-control" [(ngModel)]="creatorProfile.subscriberCount" name="subscriberCount"
+            placeholder="e.g., 5000" min="0" />
+        </div>
+      </ng-container>
+
+      <!-- ── Business-specific fields ── -->
+      <ng-container *ngIf="userRole === 'BUSINESS'">
+        <div class="section-label">Business Details</div>
+
+        <div class="form-group">
+          <label>Company Name</label>
+          <input type="text" class="form-control" [(ngModel)]="businessProfile.companyName" name="companyName"
+            placeholder="Your company name" />
+        </div>
+
+        <div class="form-group">
+          <label>Industry</label>
+          <input type="text" class="form-control" [(ngModel)]="businessProfile.industry" name="industry"
+            placeholder="e.g., Technology, Retail, Healthcare" />
+        </div>
+
+        <div class="form-group">
+          <label>Company Size</label>
+          <select class="form-control" [(ngModel)]="businessProfile.companySize" name="companySize">
+            <option value="">Select size</option>
+            <option value="1-10">1–10 employees</option>
+            <option value="11-50">11–50 employees</option>
+            <option value="51-200">51–200 employees</option>
+            <option value="201-500">201–500 employees</option>
+            <option value="500+">500+ employees</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Description</label>
+          <textarea class="form-control" [(ngModel)]="businessProfile.description" name="description" rows="3"
+            placeholder="What does your business do?"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Contact Email</label>
+          <input type="email" class="form-control" [(ngModel)]="businessProfile.contactEmail" name="contactEmail"
+            placeholder="contact@yourbusiness.com" />
+        </div>
+
+        <div class="form-group">
+          <label>Phone Number</label>
+          <input type="tel" class="form-control" [(ngModel)]="businessProfile.phoneNumber" name="phoneNumber"
+            placeholder="+1 (555) 000-0000" />
+        </div>
+      </ng-container>
+
+      <div class="button-group">
+        <button type="submit" class="btn btn-primary" [disabled]="isLoading">
+          <span *ngIf="!isLoading">Save Profile</span>
+          <span *ngIf="isLoading">Saving...</span>
+        </button>
+        <button type="button" class="btn btn-secondary" (click)="skip()">Skip for Now</button>
+      </div>
+    </form>
+  </div>
+</div>

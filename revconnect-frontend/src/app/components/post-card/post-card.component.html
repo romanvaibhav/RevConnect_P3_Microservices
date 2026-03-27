@@ -1,0 +1,141 @@
+<div class="card post-card">
+
+  <!-- Shared post attribution banner -->
+  <div class="shared-banner" *ngIf="post.isShared">
+    <i class="fa-solid fa-retweet shared-icon"></i>
+    <span>
+      <a [routerLink]="['/profile', post.authorId]" class="shared-link">{{ post.authorName }}</a>
+      reposted from
+      <a [routerLink]="['/profile', post.originalAuthorId || post.authorId]" class="shared-link">
+        {{ post.originalAuthorName || post.authorName }}
+      </a>
+    </span>
+  </div>
+
+  <!-- Header -->
+  <div class="post-header">
+    <div class="post-author">
+      <div class="author-avatar">{{ (post.authorName || 'U').charAt(0).toUpperCase() }}</div>
+      <div>
+        <a [routerLink]="['/profile', post.authorId]" class="author-name">{{ post.authorName || 'Unknown' }}</a>
+        <div class="post-meta">
+          <span class="post-time">{{ formatDate(post.createdAt) }}</span>
+          <span class="badge-type" *ngIf="post.postType && post.postType !== 'REGULAR'">{{ post.postType }}</span>
+          <span class="badge-scheduled" *ngIf="isScheduled"><i class="fa-regular fa-clock"></i> Scheduled</span>
+        </div>
+      </div>
+    </div>
+    <div class="post-menu" *ngIf="isOwnPost && !isEditing">
+      <button class="btn-icon" title="Edit" (click)="startEdit()"><i class="fa-solid fa-pen"></i></button>
+      <button class="btn-icon btn-icon-delete" title="Delete" (click)="deletePost()"><i class="fa-solid fa-trash"></i></button>
+    </div>
+  </div>
+
+  <!-- View mode -->
+  <div class="post-body" *ngIf="!isEditing">
+    <p class="post-content">{{ post.content }}</p>
+    <div class="hashtags" *ngIf="post.hashtags && post.hashtags.length > 0">
+      <span class="hashtag" *ngFor="let tag of post.hashtags">{{ tag }}</span>
+    </div>
+    <div *ngIf="post.mediaPath" class="post-media">
+      <img *ngIf="isImage(post.mediaPath)" [src]="getMediaUrl(post.mediaPath)" alt="Post media"
+        class="post-image" (error)="onMediaError($event)" />
+      <video *ngIf="isVideo(post.mediaPath)" [src]="getMediaUrl(post.mediaPath)"
+        controls class="post-video" (error)="onMediaError($event)"></video>
+      <div *ngIf="isDocument(post.mediaPath)" class="post-document">
+        <i class="fa-solid fa-file"></i> {{ getFileName(post.mediaPath) }}
+        <a [href]="getMediaUrl(post.mediaPath)" target="_blank" class="btn btn-sm btn-secondary">Download</a>
+      </div>
+    </div>
+    <div *ngIf="post.callToAction" class="cta-section">
+      <button class="cta-button">{{ getCtaText() }} →</button>
+    </div>
+    <!-- Tagged products -->
+    <div *ngIf="post.taggedProductIds && post.taggedProductIds.length > 0" class="tagged-products">
+      <span class="tagged-products-label"><i class="fa-solid fa-tag"></i> Tagged products:</span>
+      <span *ngFor="let id of post.taggedProductIds" class="product-tag">#{{ id }}</span>
+    </div>
+    <!-- Scheduled info (own post, not yet published) -->
+    <div *ngIf="isScheduled && isOwnPost" class="scheduled-info">
+      <i class="fa-regular fa-clock"></i> Scheduled for {{ post.scheduledAt | date:'medium' }}
+    </div>
+  </div>
+
+  <!-- Edit mode -->
+  <div class="post-edit" *ngIf="isEditing">
+    <div class="form-group">
+      <textarea class="form-control" [(ngModel)]="editedContent" rows="3" placeholder="Edit your post..."></textarea>
+    </div>
+    <div class="form-group">
+      <input type="text" class="form-control" [(ngModel)]="editedHashtags" placeholder="Hashtags (e.g. tech, design)" />
+      <small class="hint">Separate with spaces or commas</small>
+    </div>
+    <div class="edit-actions">
+      <button class="btn btn-primary btn-sm" (click)="saveEdit()">Save</button>
+      <button class="btn btn-secondary btn-sm" (click)="cancelEdit()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Share feedback -->
+  <div class="share-feedback success" *ngIf="shareSuccess"><i class="fa-solid fa-check"></i> Reposted successfully!</div>
+  <div class="share-feedback error" *ngIf="shareError">{{ shareError }}</div>
+
+  <!-- Actions bar -->
+  <div class="post-actions">
+    <button class="action-btn" [class.liked]="isLiked" [disabled]="isLikeLoading" (click)="toggleLike()" title="{{ isLiked ? 'Unlike' : 'Like' }}">
+      <i class="action-icon" [class]="isLiked ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"></i>
+      <span class="action-count">{{ likeCount }}</span>
+      <span class="action-label">{{ isLiked ? 'Liked' : 'Like' }}</span>
+    </button>
+
+    <button class="action-btn" [class.active]="showComments" (click)="toggleComments()" title="Comments">
+      <i class="fa-regular fa-comment action-icon"></i>
+      <span class="action-count">{{ commentCount }}</span>
+      <span class="action-label">Comment</span>
+    </button>
+
+    <button class="action-btn" (click)="sharePost()" title="Repost to your feed">
+      <i class="fa-solid fa-retweet action-icon"></i>
+      <span class="action-label">Repost</span>
+    </button>
+
+    <button class="action-btn" [class.saved]="isSaved" (click)="toggleSave()" title="{{ isSaved ? 'Unsave' : 'Save' }}">
+      <i class="action-icon" [class]="isSaved ? 'fa-solid fa-bookmark' : 'fa-regular fa-bookmark'"></i>
+      <span class="action-label">{{ isSaved ? 'Saved' : 'Save' }}</span>
+    </button>
+  </div>
+
+  <!-- Comments section -->
+  <div *ngIf="showComments" class="comments-section">
+    <!-- Add comment -->
+    <div class="comment-input">
+      <div class="comment-avatar">{{ (authService.getCurrentUser()?.name || 'U').charAt(0).toUpperCase() }}</div>
+      <div class="comment-input-wrap">
+        <input type="text" class="form-control" placeholder="Write a comment..."
+          [(ngModel)]="newCommentContent" (keyup.enter)="addComment()" />
+        <button class="btn-send" (click)="addComment()" [disabled]="!newCommentContent.trim()" title="Post comment">
+          <i class="fa-solid fa-paper-plane"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Comments list -->
+    <div class="comments-list">
+      <p *ngIf="comments.length === 0" class="no-comments">No comments yet. Be the first!</p>
+      <div *ngFor="let c of comments" class="comment">
+        <div class="comment-avatar-sm">{{ (c.username || c.userName || 'U').charAt(0).toUpperCase() }}</div>
+        <div class="comment-body">
+          <div class="comment-bubble">
+            <div class="comment-header">
+              <a [routerLink]="['/profile', c.userId]" class="comment-author">{{ c.username || c.userName || 'Unknown' }}</a>
+              <span class="comment-time">{{ formatDate(c.createdAt) }}</span>
+              <button *ngIf="canDeleteComment(c)" class="btn-delete-comment" (click)="deleteComment(c.id)" title="Delete comment">×</button>
+            </div>
+            <p class="comment-content">{{ c.content }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

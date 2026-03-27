@@ -1,0 +1,20 @@
+{
+  "files.exclude": {
+    "**/.git": true,
+    "**/.mvn": true,
+    "**/target": true,
+    "**/*.class": true,
+    "**/package-lock.json": true,
+    "**/tsconfig.spec.json": true,
+    "**/karma.config.js": true,
+    "open-presentation-files.bat": true
+  },
+  "explorer.fileNesting.enabled": true,
+  "explorer.fileNesting.patterns": {
+    "pom.xml": "mvnw, mvnw.cmd, .gitignore",
+    "angular.json": "tsconfig*.json, karma.config.js, proxy.conf.json"
+  },
+  "editor.fontSize": 14,
+  "editor.minimap.enabled": false,
+  "workbench.tree.indent": 16
+}

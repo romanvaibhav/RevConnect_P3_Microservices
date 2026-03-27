@@ -1,0 +1,75 @@
+<div class="auth-container">
+  <div class="auth-card">
+    <h1 class="auth-title">Join RevConnect</h1>
+    <p class="auth-subtitle">Create your account</p>
+
+    <form (ngSubmit)="onSubmit()" class="auth-form">
+      <div class="alert alert-error" *ngIf="errorMessage">{{ errorMessage }}</div>
+      <div class="alert alert-success" *ngIf="successMessage">{{ successMessage }}</div>
+
+      <!-- Avatar picker -->
+      <div class="avatar-picker-wrap">
+        <div class="avatar-preview" (click)="avatarInput.click()">
+          <img *ngIf="avatarPreview" [src]="avatarPreview" alt="Avatar" class="avatar-img" />
+          <div *ngIf="!avatarPreview" class="avatar-placeholder">
+            <i class="fa-solid fa-camera"></i>
+          </div>
+          <div class="avatar-overlay"><i class="fa-solid fa-camera"></i></div>
+        </div>
+        <input #avatarInput type="file" accept="image/*" style="display:none" (change)="onAvatarSelected($event)" />
+        <span class="avatar-hint">Add profile photo</span>
+      </div>
+
+      <div class="form-group">
+        <input type="text" class="form-control" placeholder="Full Name"
+          [(ngModel)]="user.name" name="name" required />
+      </div>
+
+      <div class="form-group">
+        <input type="text" class="form-control" placeholder="Username"
+          [(ngModel)]="user.username" name="username" required />
+      </div>
+
+      <div class="form-group">
+        <input type="email" class="form-control" placeholder="Email"
+          [(ngModel)]="user.email" name="email" required />
+      </div>
+
+      <div class="form-group">
+        <input type="password" class="form-control" placeholder="Password"
+          [(ngModel)]="user.password" name="password" required />
+      </div>
+
+      <div class="form-group">
+        <input type="password" class="form-control" placeholder="Confirm Password"
+          [(ngModel)]="confirmPassword" name="confirmPassword" required />
+      </div>
+
+      <div class="form-group">
+        <label>Account Type</label>
+        <select class="form-control" [(ngModel)]="user.role" name="role">
+          <option value="USER">Personal User</option>
+          <option value="CREATOR">Creator</option>
+          <option value="BUSINESS">Business</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Account Privacy</label>
+        <select class="form-control" [(ngModel)]="user.accountPrivacy" name="accountPrivacy">
+          <option value="PUBLIC">Public</option>
+          <option value="PRIVATE">Private</option>
+        </select>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block" [disabled]="isLoading">
+        <span *ngIf="!isLoading"><i class="fa-solid fa-user-plus"></i> Sign Up</span>
+        <span *ngIf="isLoading"><i class="fa-solid fa-spinner fa-spin"></i> Creating account...</span>
+      </button>
+    </form>
+
+    <div class="auth-footer">
+      <p>Already have an account? <a routerLink="/login">Log in</a></p>
+    </div>
+  </div>
+</div>

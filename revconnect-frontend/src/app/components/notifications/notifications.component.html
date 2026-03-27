@@ -1,0 +1,100 @@
+<div class="container">
+  <div class="notif-layout">
+
+    <!-- Header -->
+    <div class="notif-header">
+      <div class="header-left">
+        <h1 class="page-title">Notifications</h1>
+        <span class="unread-pill" *ngIf="unreadCount > 0">{{ unreadCount }} new</span>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-ghost btn-sm" *ngIf="unreadCount > 0" (click)="markAllAsRead()">
+          <i class="fa-solid fa-check-double"></i> Mark all read
+        </button>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs-bar">
+      <button class="tab-btn" [class.active]="activeTab === 'all'" (click)="setTab('all')">
+        All <span class="tab-count">{{ notifications.length }}</span>
+      </button>
+      <button class="tab-btn" [class.active]="activeTab === 'unread'" (click)="setTab('unread')">
+        Unread <span class="tab-count" [class.has-items]="unreadCount > 0">{{ unreadCount }}</span>
+      </button>
+      <button class="tab-btn" [class.active]="activeTab === 'preferences'" (click)="setTab('preferences')">
+        <i class="fa-solid fa-gear"></i> Preferences
+      </button>
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="isLoading" class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading notifications...</p>
+    </div>
+
+    <!-- All / Unread tab -->
+    <div *ngIf="!isLoading && activeTab !== 'preferences'" class="notif-list-wrap card">
+
+      <div *ngIf="filteredNotifications.length === 0" class="empty-state">
+        <span class="empty-icon">{{ activeTab === 'unread' ? '✅' : '🔔' }}</span>
+        <p>{{ activeTab === 'unread' ? 'All caught up!' : 'No notifications yet.' }}</p>
+      </div>
+
+      <div class="notif-list">
+        <div
+          *ngFor="let n of filteredNotifications"
+          class="notif-item"
+          [class.unread]="!n.read"
+          (click)="markAsRead(n)"
+        >
+          <div class="notif-icon-wrap" [attr.data-type]="n.type">
+            <span class="notif-icon">{{ getIcon(n.type) }}</span>
+          </div>
+
+          <div class="notif-body">
+            <p class="notif-message">{{ n.message }}</p>
+            <div class="notif-meta">
+              <span class="notif-type-label">{{ getTypeLabel(n.type) }}</span>
+              <span class="notif-dot">·</span>
+              <span class="notif-time">{{ formatDate(n.createdAt) }}</span>
+            </div>
+          </div>
+
+          <div class="notif-right">
+            <span class="unread-dot" *ngIf="!n.read" title="Unread"></span>
+            <button class="btn-delete" (click)="deleteNotification(n, $event)" title="Delete">×</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Preferences tab -->
+    <div *ngIf="activeTab === 'preferences'" class="card prefs-card">
+      <h2 class="prefs-title">Notification Preferences</h2>
+      <p class="prefs-desc">Choose which types of notifications you want to receive.</p>
+
+      <div class="prefs-list">
+        <label *ngFor="let key of prefKeys" class="pref-row">
+          <div class="pref-left">
+            <span class="pref-icon">{{ typeIcons[key] }}</span>
+            <span class="pref-label">{{ typeLabels[key] }}</span>
+          </div>
+          <div class="toggle-wrap">
+            <input type="checkbox" class="toggle-input" [id]="'pref-' + key"
+              [(ngModel)]="preferences[key]" />
+            <label class="toggle-track" [for]="'pref-' + key">
+              <span class="toggle-thumb"></span>
+            </label>
+          </div>
+        </label>
+      </div>
+
+      <div class="prefs-actions">
+        <button class="btn btn-primary" (click)="savePreferences()">Save Preferences</button>
+        <span class="save-confirm" *ngIf="prefSaved"><i class="fa-solid fa-check"></i> Saved!</span>
+      </div>
+    </div>
+
+  </div>
+</div>

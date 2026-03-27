@@ -1,0 +1,53 @@
+<nav class="navbar" *ngIf="isAuthenticated()">
+  <div class="navbar-container">
+
+    <div class="navbar-brand">
+      <a routerLink="/feed">
+        <i class="fa-solid fa-link"></i> RevConnect
+      </a>
+    </div>
+
+    <div class="navbar-menu">
+      <a routerLink="/feed" routerLinkActive="active" class="nav-link">
+        <i class="fa-solid fa-house"></i>
+        <span class="nav-text">Feed</span>
+      </a>
+      <a routerLink="/search" routerLinkActive="active" class="nav-link">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <span class="nav-text">Search</span>
+      </a>
+      <a routerLink="/analytics" routerLinkActive="active" class="nav-link" *ngIf="isCreatorOrBusiness()">
+        <i class="fa-solid fa-chart-line"></i>
+        <span class="nav-text">Analytics</span>
+      </a>
+      <a routerLink="/business-dashboard" routerLinkActive="active" class="nav-link" *ngIf="isBusiness()">
+        <i class="fa-solid fa-building"></i>
+        <span class="nav-text">Business</span>
+      </a>
+      <a routerLink="/connections" routerLinkActive="active" class="nav-link">
+        <i class="fa-solid fa-user-group"></i>
+        <span class="nav-text">Connections</span>
+        <span class="notification-badge" *ngIf="pendingRequestsCount > 0">{{ pendingRequestsCount }}</span>
+      </a>
+      <a routerLink="/notifications" routerLinkActive="active" class="nav-link">
+        <i class="fa-solid fa-bell"></i>
+        <span class="nav-text">Notifications</span>
+        <span class="notification-badge" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
+      </a>
+    </div>
+
+    <div class="navbar-right">
+      <!-- Profile avatar -->
+      <a (click)="navigateToProfile()" class="nav-avatar" title="My Profile">
+        <img *ngIf="currentAvatarUrl" [src]="currentAvatarUrl" alt="Avatar" class="avatar-letter avatar-img-sm" />
+        <span *ngIf="!currentAvatarUrl" class="avatar-letter">{{ (currentUser()?.name || 'U').charAt(0).toUpperCase() }}</span>
+        <span class="nav-text">Profile</span>
+      </a>
+      <button (click)="logout()" class="btn-logout" title="Logout">
+        <i class="fa-solid fa-right-from-bracket"></i>
+        <span class="nav-text">Logout</span>
+      </button>
+    </div>
+
+  </div>
+</nav>

@@ -1,0 +1,65 @@
+.search-layout { max-width: 800px; margin: 20px auto; }
+
+.search-form { margin-bottom: 28px; }
+
+.search-type-selector { display: flex; gap: 10px; margin-bottom: 14px; }
+
+.type-btn {
+  flex: 1; padding: 10px;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px; cursor: pointer;
+  font-weight: 600; color: rgba(255,255,255,0.60);
+  transition: all 0.2s;
+}
+.type-btn:hover { background: rgba(255,255,255,0.12); color: #fff; }
+.type-btn.active {
+  background: linear-gradient(90deg, #667eea, #764ba2);
+  color: #fff; border-color: transparent;
+}
+
+.search-input-group { display: flex; gap: 10px; }
+.search-input-group .form-control { flex: 1; }
+
+/* Results */
+.user-results, .post-results { padding: 10px 0; }
+
+.user-item {
+  display: flex; align-items: center; gap: 15px;
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  transition: background 0.15s;
+}
+.user-item:hover { background: rgba(255,255,255,0.05); }
+.user-item:last-child { border-bottom: none; }
+
+.user-avatar {
+  width: 50px; height: 50px; border-radius: 50%;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff; display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 20px; flex-shrink: 0;
+}
+
+.user-info { flex: 1; }
+.user-name { font-weight: 600; color: #fff; text-decoration: none; display: block; margin-bottom: 4px; }
+.user-name:hover { text-decoration: underline; color: #a5b4fc; }
+.user-meta { font-size: 14px; color: rgba(255,255,255,0.45); margin: 0 0 5px; }
+.user-badge {
+  display: inline-block; padding: 2px 8px;
+  background: rgba(102,126,234,0.20); color: #a5b4fc;
+  border-radius: 10px; font-size: 11px; font-weight: 600;
+}
+
+.empty-state { text-align: center; padding: 40px 20px; color: rgba(255,255,255,0.35); font-style: italic; }
+
+@media (max-width: 480px) {
+  .search-layout { margin: 10px; }
+  .search-type-selector { flex-direction: column; gap: 8px; }
+  .search-input-group { flex-direction: column; }
+  .search-input-group .btn { width: 100%; }
+  .user-item { flex-direction: column; gap: 10px; align-items: center; text-align: center; }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+  .search-layout { margin: 15px; }
+}

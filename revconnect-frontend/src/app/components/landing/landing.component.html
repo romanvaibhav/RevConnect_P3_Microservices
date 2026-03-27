@@ -1,0 +1,173 @@
+<div class="landing-wrapper">
+
+  <!-- Navbar -->
+  <nav class="landing-nav">
+    <div class="nav-brand">
+      <i class="fa-solid fa-link brand-icon"></i>
+      <span class="brand-name">RevConnect</span>
+    </div>
+    <div class="nav-actions">
+      <button class="btn-nav-outline" (click)="goToLogin()">Log In</button>
+      <button class="btn-nav-filled" (click)="goToRegister()">Sign Up</button>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1 class="hero-title">
+        Connect. Create.<br>
+        <span class="highlight">Grow.</span>
+      </h1>
+      <p class="hero-subtitle">
+        RevConnect is the platform for creators, businesses, and
+        professionals to share ideas, build communities, and grow together.
+      </p>
+      <div class="hero-buttons">
+        <button class="btn-primary-hero" (click)="goToRegister()">Get Started — It's Free</button>
+        <button class="btn-secondary-hero" (click)="goToLogin()">Already have an account?</button>
+      </div>
+    </div>
+
+    <!-- Right: stacked preview cards -->
+    <div class="hero-visual">
+      <div class="mock-card">
+        <div class="mock-dot purple"></div>
+        <div class="mock-lines">
+          <div class="mock-line long"></div>
+          <div class="mock-line short"></div>
+        </div>
+      </div>
+      <div class="mock-card">
+        <div class="mock-dot green"></div>
+        <div class="mock-lines">
+          <div class="mock-line long"></div>
+          <div class="mock-line medium"></div>
+        </div>
+      </div>
+      <div class="mock-card">
+        <div class="mock-dot orange"></div>
+        <div class="mock-lines">
+          <div class="mock-line medium"></div>
+          <div class="mock-line short"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats Strip -->
+  <section class="stats-strip">
+    <div class="stat-item">
+      <span class="stat-number">10K+</span>
+      <span class="stat-label">Creators</span>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <span class="stat-number">50K+</span>
+      <span class="stat-label">Posts Shared</span>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <span class="stat-number">200K+</span>
+      <span class="stat-label">Interactions</span>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <span class="stat-number">99.9%</span>
+      <span class="stat-label">Uptime</span>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="features-section">
+    <h2 class="features-heading">Everything you need to grow</h2>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fa-solid fa-newspaper"></i>
+        </div>
+        <h3>Smart Feed</h3>
+        <p>A personalized feed that surfaces the content and people most relevant to you.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fa-solid fa-users"></i>
+        </div>
+        <h3>Social Graph</h3>
+        <p>Follow, connect, and build your network with creators and professionals worldwide.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fa-solid fa-heart"></i>
+        </div>
+        <h3>Interactions</h3>
+        <p>Like, comment, and engage with posts. Real-time notifications keep you in the loop.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fa-solid fa-chart-line"></i>
+        </div>
+        <h3>Analytics</h3>
+        <p>Track your post performance and audience growth with detailed analytics.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fa-solid fa-box"></i>
+        </div>
+        <h3>Products</h3>
+        <p>Showcase and sell your products directly to your community without leaving the platform.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fa-solid fa-bell"></i>
+        </div>
+        <h3>Notifications</h3>
+        <p>Stay updated with instant notifications for every interaction that matters to you.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Banner -->
+  <section class="cta-banner">
+    <h2>Ready to start your journey?</h2>
+    <p>Join thousands of creators and professionals already on RevConnect.</p>
+    <button class="btn-primary-hero" (click)="goToRegister()">Get Started — It's Free</button>
+  </section>
+
+  <!-- How it works -->
+  <section class="how-section">
+    <h2 class="section-title">Get started in minutes</h2>
+    <div class="steps-row">
+      <div class="step">
+        <div class="step-number">1</div>
+        <h4>Create your account</h4>
+        <p>Sign up for free and set up your profile in seconds.</p>
+      </div>
+      <div class="step-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+      <div class="step">
+        <div class="step-number">2</div>
+        <h4>Share your ideas</h4>
+        <p>Post content, share updates, and express yourself.</p>
+      </div>
+      <div class="step-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+      <div class="step">
+        <div class="step-number">3</div>
+        <h4>Grow your network</h4>
+        <p>Connect with like-minded people and build your community.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta-section">
+    <h2>Ready to join RevConnect?</h2>
+    <p>Thousands of creators and professionals are already growing here.</p>
+    <button class="btn-primary-hero" (click)="goToRegister()">Get Started — It's Free</button>
+  </section>
+
+  <!-- Footer -->
+  <footer class="landing-footer">
+    <span>© 2026 RevConnect. Built with Spring Boot & Angular.</span>
+  </footer>
+
+</div>

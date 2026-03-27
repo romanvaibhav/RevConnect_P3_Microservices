@@ -1,0 +1,117 @@
+.biz-dashboard { max-width: 900px; margin: 0 auto; padding: 24px 16px; }
+
+.access-denied { text-align: center; padding: 80px 20px; }
+.lock-icon { font-size: 48px; display: block; margin-bottom: 16px; }
+.access-denied h2 { color: #fff; margin-bottom: 20px; }
+.btn-primary {
+  background: linear-gradient(90deg, #667eea, #764ba2);
+  color: #fff; padding: 10px 24px; border-radius: 8px;
+  text-decoration: none; font-weight: 600;
+}
+
+/* Header */
+.dash-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+.dash-header h1 { margin: 0 0 4px; font-size: 1.6rem; color: #fff; }
+.dash-sub { margin: 0; color: rgba(255,255,255,0.45); font-size: 0.9rem; }
+.dash-header-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.follower-badge { background: rgba(102,126,234,0.20); color: #a5b4fc; padding: 6px 14px; border-radius: 20px; font-weight: 600; font-size: 0.85rem; }
+.btn-view-page {
+  background: rgba(102,126,234,0.12); color: #a5b4fc;
+  padding: 8px 16px; border-radius: 8px; text-decoration: none;
+  font-weight: 600; font-size: 0.85rem; border: 1px solid rgba(102,126,234,0.30);
+}
+.btn-compose {
+  background: linear-gradient(90deg, #667eea, #764ba2);
+  color: #fff; border: none; padding: 8px 18px;
+  border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.9rem;
+}
+.btn-compose:hover { opacity: 0.88; }
+
+/* Stats */
+.stats-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 24px; }
+.stat-chip {
+  background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 20px; padding: 6px 14px; font-size: 0.85rem; color: rgba(255,255,255,0.60);
+}
+.stat-chip strong { color: #fff; }
+
+/* Compose */
+.compose-panel {
+  background: rgba(255,255,255,0.06); border-radius: 12px; padding: 24px;
+  border: 1px solid rgba(255,255,255,0.10); margin-bottom: 24px;
+}
+.compose-panel h3 { margin: 0 0 16px; color: #fff; }
+
+.post-type-selector { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+.type-btn {
+  background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12);
+  padding: 8px 16px; border-radius: 8px; cursor: pointer;
+  font-size: 0.85rem; color: rgba(255,255,255,0.60); transition: all 0.15s;
+}
+.type-btn.active { background: linear-gradient(90deg, #667eea, #764ba2); color: #fff; border-color: transparent; }
+.type-btn:hover:not(.active) { background: rgba(102,126,234,0.15); border-color: rgba(102,126,234,0.30); color: #a5b4fc; }
+
+.compose-textarea {
+  width: 100%; background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12); border-radius: 8px;
+  padding: 12px; font-size: 0.95rem; resize: vertical;
+  font-family: inherit; box-sizing: border-box; color: #fff;
+}
+.compose-textarea::placeholder { color: rgba(255,255,255,0.30); }
+.compose-textarea:focus { outline: none; border-color: rgba(102,126,234,0.60); }
+
+.compose-options { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-top: 12px; }
+.compose-field label { display: block; font-size: 0.8rem; color: rgba(255,255,255,0.50); margin-bottom: 4px; font-weight: 600; }
+.compose-field input, .compose-field select {
+  width: 100%; background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12); border-radius: 6px;
+  padding: 8px 10px; font-size: 0.85rem; box-sizing: border-box; color: #fff;
+}
+.compose-field input:focus, .compose-field select:focus { outline: none; border-color: rgba(102,126,234,0.60); }
+.compose-field select option { background: #302b63; }
+
+.compose-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; }
+.compose-feedback { font-size: 0.85rem; }
+.success-msg { color: #6ee7b7; }
+.error-msg   { color: #fca5a5; }
+.btn-publish {
+  background: rgba(67,233,123,0.20); color: #6ee7b7;
+  border: 1px solid rgba(67,233,123,0.30); padding: 10px 24px;
+  border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.9rem;
+}
+.btn-publish:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn-publish:hover:not(:disabled) { background: rgba(67,233,123,0.30); }
+
+/* Tabs */
+.post-tabs { display: flex; gap: 0; border-bottom: 1px solid rgba(255,255,255,0.10); margin-bottom: 20px; }
+.tab-btn {
+  background: none; border: none; padding: 10px 20px;
+  font-size: 0.9rem; cursor: pointer; color: rgba(255,255,255,0.50);
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
+}
+.tab-btn.active { color: #a5b4fc; border-bottom-color: #667eea; font-weight: 600; }
+
+.loading, .empty { text-align: center; padding: 40px; color: rgba(255,255,255,0.35); }
+.posts-list { display: flex; flex-direction: column; gap: 16px; }
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .biz-dashboard { padding: 16px 10px; }
+  .dash-header { flex-direction: column; }
+  .dash-header h1 { font-size: 1.3rem; }
+  .dash-header-actions { width: 100%; justify-content: flex-start; }
+  .stats-row { gap: 8px; }
+  .stat-chip { font-size: 0.8rem; padding: 5px 10px; }
+  .compose-options { grid-template-columns: 1fr; }
+  .compose-actions { flex-direction: column; gap: 10px; align-items: stretch; }
+  .btn-publish { width: 100%; }
+  .post-tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .tab-btn { white-space: nowrap; }
+  .post-type-selector { flex-wrap: wrap; }
+  .type-btn { flex: 1; min-width: 100px; text-align: center; }
+}
+
+@media (max-width: 480px) {
+  .dash-header-actions { flex-direction: column; align-items: stretch; }
+  .btn-view-page, .btn-compose { width: 100%; text-align: center; }
+}

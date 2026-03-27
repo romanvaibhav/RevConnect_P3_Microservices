@@ -1,0 +1,307 @@
+<div class="container">
+  <div class="feed-layout">
+
+    <!-- ── Left Sidebar ── -->
+    <aside class="feed-left-sidebar">
+
+      <!-- Profile summary -->
+      <div class="card left-profile-card">
+        <div class="left-profile-banner"></div>
+        <div class="left-profile-body">
+          <div class="left-avatar" *ngIf="!currentAvatarUrl">{{ (authService.getCurrentUser()?.name || 'U').charAt(0).toUpperCase() }}</div>
+          <img *ngIf="currentAvatarUrl" [src]="currentAvatarUrl" alt="Avatar" class="left-avatar left-avatar-img" />
+          <div class="left-name">{{ authService.getCurrentUser()?.name || 'User' }}</div>
+          <div class="left-username">{{ '@' + (authService.getCurrentUser()?.username || '') }}</div>
+          <span class="left-role-badge" [ngClass]="currentRole.toLowerCase()">
+            <i class="fa-solid"
+              [class.fa-user]="currentRole === 'USER'"
+              [class.fa-star]="currentRole === 'CREATOR'"
+              [class.fa-building]="currentRole === 'BUSINESS'"></i>
+            {{ currentRole === 'USER' ? 'Personal' : currentRole === 'CREATOR' ? 'Creator' : 'Business' }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Quick nav shortcuts -->
+      <div class="card left-shortcuts-card">
+        <div class="shortcut-item" routerLink="/feed">
+          <i class="fa-solid fa-house"></i> My Feed
+        </div>
+        <div class="shortcut-item" routerLink="/connections">
+          <i class="fa-solid fa-user-group"></i> Connections
+        </div>
+        <div class="shortcut-item" routerLink="/notifications">
+          <i class="fa-solid fa-bell"></i> Notifications
+        </div>
+        <div class="shortcut-item" routerLink="/saved">
+          <i class="fa-solid fa-bookmark"></i> Saved Posts
+        </div>
+        <div class="shortcut-item" *ngIf="isAdvancedUser" routerLink="/analytics">
+          <i class="fa-solid fa-chart-line"></i> Analytics
+        </div>
+        <div class="shortcut-item" *ngIf="currentRole === 'BUSINESS'" routerLink="/business-dashboard">
+          <i class="fa-solid fa-store"></i> Business Dashboard
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- ── Main feed column ── -->
+    <div class="feed-main">
+
+      <!-- Create Post Card -->
+      <div class="card create-post-card">
+        <div class="create-post-header">
+          <div class="user-avatar-sm">{{ (authService.getCurrentUser()?.name || 'U').charAt(0).toUpperCase() }}</div>
+          <textarea class="form-control post-textarea" placeholder="What's on your mind? Use #hashtags inline..."
+            [(ngModel)]="newPostContent" rows="3" (input)="onContentInput()"></textarea>
+        </div>
+
+        <!-- Post toolbar -->
+        <div class="post-toolbar">
+          <div class="toolbar-actions">
+            <button class="toolbar-btn" type="button" title="Add emoji" (click)="toggleEmojiPicker()">
+              <i class="fa-regular fa-face-smile"></i>
+            </button>
+            <button class="toolbar-btn" type="button" title="Options" (click)="showAdvancedOptions = !showAdvancedOptions">
+              <i class="fa-solid fa-sliders"></i>
+            </button>
+          </div>
+          <div class="char-counter" [class.warn]="charCount > 240" [class.over]="charCount > 280">
+            {{ charCount }}/280
+          </div>
+        </div>
+
+        <!-- Emoji picker (simple) -->
+        <div class="emoji-picker" *ngIf="showEmojiPicker">
+          <span *ngFor="let e of emojis" class="emoji-item" (click)="insertEmoji(e)">{{ e }}</span>
+        </div>
+
+        <div class="form-group" style="margin-top:10px">
+          <input type="text" class="form-control" placeholder="Add hashtags (e.g. tech, design, startup)"
+            [(ngModel)]="hashtagInput" />
+          <small class="hint">Separate with spaces or commas. # is optional.</small>
+        </div>
+
+        <div class="post-actions-bar">
+          <div></div>
+          <button class="btn btn-primary" (click)="createPost()" [disabled]="isPosting || charCount > 280">
+            <span *ngIf="!isPosting">
+              <i *ngIf="scheduledAt" class="fa-regular fa-clock"></i>
+              <ng-container *ngIf="scheduledAt">Schedule</ng-container>
+              <ng-container *ngIf="!scheduledAt">Post</ng-container>
+            </span>
+            <span *ngIf="isPosting"><i class="fa-solid fa-spinner fa-spin"></i> Posting...</span>
+          </button>
+        </div>
+
+        <!-- Advanced options -->
+        <div *ngIf="showAdvancedOptions" class="advanced-options">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Post Type</label>
+              <select class="form-control" [(ngModel)]="postType">
+                <option value="REGULAR">Regular</option>
+                <option value="PROMOTIONAL" *ngIf="isAdvancedUser">Promotional</option>
+                <option value="ANNOUNCEMENT">Announcement</option>
+              </select>
+            </div>
+            <div class="form-group" *ngIf="isAdvancedUser && postType === 'PROMOTIONAL'">
+              <label>Call to Action</label>
+              <select class="form-control" [(ngModel)]="callToAction">
+                <option value="">None</option>
+                <option value="LEARN_MORE">Learn More</option>
+                <option value="SHOP_NOW">Shop Now</option>
+                <option value="CONTACT_US">Contact Us</option>
+                <option value="SIGN_UP">Sign Up</option>
+              </select>
+            </div>
+          </div>
+
+          <ng-container *ngIf="isAdvancedUser">
+            <div class="advanced-section-label">Advanced Options</div>
+            <div class="form-group">
+              <label><i class="fa-regular fa-calendar"></i> Schedule Post (optional)</label>
+              <input type="datetime-local" class="form-control" [(ngModel)]="scheduledAt" [min]="minScheduleDate" />
+              <small class="hint">Leave blank to post immediately.</small>
+            </div>
+            <div class="form-group" *ngIf="currentRole === 'BUSINESS'">
+              <label><i class="fa-solid fa-tag"></i> Tag Products (optional)</label>
+              <input type="text" class="form-control" [(ngModel)]="taggedProductInput"
+                placeholder="Enter product IDs separated by commas (e.g. 1, 2, 3)" />
+              <small class="hint">Products must belong to your business account.</small>
+            </div>
+          </ng-container>
+        </div>
+
+        <div class="scheduled-preview" *ngIf="scheduledAt">
+          <i class="fa-regular fa-clock"></i> Will be published on {{ formatScheduled(scheduledAt) }}
+        </div>
+
+        <div class="alert alert-success" *ngIf="successMessage">{{ successMessage }}</div>
+        <div class="alert alert-error" *ngIf="errorMessage">{{ errorMessage }}</div>
+      </div>
+
+      <!-- Feed Tabs + Filter bar -->
+      <div class="feed-controls card">
+        <div class="tabs-row">
+          <button class="tab-btn" [class.active]="activeTab === 'feed'" (click)="setTab('feed')">
+            <i class="fa-solid fa-house"></i> My Feed
+          </button>
+          <button class="tab-btn" [class.active]="activeTab === 'trending'" (click)="setTab('trending')">
+            <i class="fa-solid fa-fire"></i> Trending
+          </button>
+          <button class="tab-btn" *ngIf="isAdvancedUser" [class.active]="activeTab === 'scheduled'" (click)="setTab('scheduled')">
+            <i class="fa-regular fa-clock"></i> Scheduled
+            <span class="tab-badge" *ngIf="scheduledPosts.length > 0">{{ scheduledPosts.length }}</span>
+          </button>
+          <button class="tab-btn filter-toggle" [class.active]="showFilters" (click)="showFilters = !showFilters">
+            <i class="fa-solid fa-filter"></i> Filters <span class="filter-dot" *ngIf="hasActiveFilters">●</span>
+          </button>
+        </div>
+
+        <div class="active-filters" *ngIf="hasActiveFilters">
+          <span class="filter-chip" *ngIf="activeHashtag">
+            {{ activeHashtag }} <button (click)="clearFilters()">×</button>
+          </span>
+          <span class="filter-chip" *ngIf="filterPostType">
+            {{ filterPostType }} <button (click)="filterPostType = ''; applyFilters()">×</button>
+          </span>
+          <span class="filter-chip" *ngIf="filterUserType">
+            {{ filterUserType }} users <button (click)="filterUserType = ''; applyFilters()">×</button>
+          </span>
+          <button class="btn-clear-all" (click)="clearFilters()">Clear all</button>
+        </div>
+
+        <div *ngIf="showFilters" class="filters-panel">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Post Type</label>
+              <select class="form-control" [(ngModel)]="filterPostType">
+                <option value="">All Types</option>
+                <option value="REGULAR">Regular</option>
+                <option value="PROMOTIONAL">Promotional</option>
+                <option value="ANNOUNCEMENT">Announcement</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>User Type</label>
+              <select class="form-control" [(ngModel)]="filterUserType">
+                <option value="">All Users</option>
+                <option value="USER">Personal Users</option>
+                <option value="CREATOR">Creators</option>
+                <option value="BUSINESS">Businesses</option>
+              </select>
+            </div>
+          </div>
+          <div class="filter-actions">
+            <button class="btn btn-primary btn-sm" (click)="applyFilters()">Apply</button>
+            <button class="btn btn-secondary btn-sm" (click)="clearFilters()">Reset</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feed Tab -->
+      <div *ngIf="activeTab === 'feed'">
+        <div class="alert alert-success repost-toast" *ngIf="repostMessage">{{ repostMessage }}</div>
+        <div *ngIf="isLoading" class="loading-state">
+          <div class="spinner"></div>
+          <p>Loading feed...</p>
+        </div>
+        <ng-container *ngIf="!isLoading">
+          <div *ngIf="displayPosts.length === 0" class="card empty-feed">
+            <span class="empty-icon"><i class="fa-solid fa-inbox"></i></span>
+            <p *ngIf="!hasActiveFilters">No posts yet. Follow people or create your first post!</p>
+            <p *ngIf="hasActiveFilters">No posts match your filters.</p>
+            <button *ngIf="hasActiveFilters" class="btn btn-secondary btn-sm" (click)="clearFilters()">Clear Filters</button>
+          </div>
+          <app-post-card *ngFor="let post of displayPosts" [post]="post"
+            (postDeleted)="onPostDeleted($event)"
+            (postUpdated)="onPostUpdated($event)"
+            (postShared)="onPostShared($event)">
+          </app-post-card>
+        </ng-container>
+      </div>
+
+      <!-- Trending Tab -->
+      <div *ngIf="activeTab === 'trending'" class="card trending-card">
+        <h2 class="section-title"><i class="fa-solid fa-fire"></i> Trending Hashtags</h2>
+        <p class="section-sub">Click a hashtag to filter the feed</p>
+        <div *ngIf="trendingHashtags.length === 0" class="empty-trending">No trending hashtags yet.</div>
+        <div class="trending-list">
+          <div *ngFor="let tag of trendingHashtags; let i = index"
+            class="trending-item" (click)="searchByHashtag(tag.name)">
+            <span class="trending-rank">{{ i + 1 }}</span>
+            <div class="trending-info">
+              <span class="trending-name">{{ tag.name }}</span>
+              <span class="trending-count">{{ tag.count }} posts</span>
+            </div>
+            <i class="fa-solid fa-arrow-right trending-arrow"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scheduled Tab -->
+      <div *ngIf="activeTab === 'scheduled' && isAdvancedUser">
+        <div class="card scheduled-header-card">
+          <h2 class="section-title"><i class="fa-regular fa-clock"></i> Scheduled Posts</h2>
+          <p class="section-sub">Posts queued for future publishing.</p>
+        </div>
+        <div *ngIf="scheduledPosts.length === 0" class="card empty-feed">
+          <span class="empty-icon"><i class="fa-regular fa-calendar"></i></span>
+          <p>No scheduled posts. Use the create form above and pick a future date/time.</p>
+        </div>
+        <app-post-card *ngFor="let post of scheduledPosts" [post]="post"
+          (postDeleted)="onPostDeleted($event)"
+          (postUpdated)="onPostUpdated($event)">
+        </app-post-card>
+      </div>
+
+    </div>
+
+    <!-- ── Right Sidebar ── -->
+    <aside class="feed-sidebar">
+
+      <!-- Trending hashtags widget -->
+      <div class="card sidebar-card">
+        <h3 class="sidebar-title"><i class="fa-solid fa-fire"></i> Trending</h3>
+        <div *ngIf="trendingHashtags.length === 0" class="sidebar-empty">No trending tags yet.</div>
+        <div class="trending-sidebar-list">
+          <div *ngFor="let tag of trendingHashtags.slice(0, 8); let i = index"
+            class="trending-sidebar-item" (click)="searchByHashtag(tag.name)"
+            [class.active]="activeHashtag === tag.name">
+            <span class="ts-rank">{{ i + 1 }}</span>
+            <div class="ts-info">
+              <span class="ts-name">{{ tag.name }}</span>
+              <span class="ts-count">{{ tag.count }} posts</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hashtag search -->
+      <div class="card sidebar-card">
+        <h3 class="sidebar-title"><i class="fa-solid fa-magnifying-glass"></i> Search</h3>
+        <div class="hashtag-search-wrap">
+          <div class="search-input-wrap">
+            <i class="fa-solid fa-hashtag search-icon"></i>
+            <input type="text" class="form-control search-input" placeholder="Search hashtags, users…"
+              [(ngModel)]="hashtagSearch"
+              (keyup.enter)="searchByHashtag(hashtagSearch)" />
+          </div>
+          <button class="btn btn-primary btn-sm" (click)="searchByHashtag(hashtagSearch)"
+            [disabled]="!hashtagSearch.trim()">Go</button>
+        </div>
+      </div>
+
+      <!-- Scheduled count (CREATOR/BUSINESS) -->
+      <div class="card sidebar-card" *ngIf="isAdvancedUser && scheduledPosts.length > 0">
+        <h3 class="sidebar-title"><i class="fa-regular fa-clock"></i> Scheduled</h3>
+        <p class="sidebar-scheduled-count">{{ scheduledPosts.length }} post{{ scheduledPosts.length !== 1 ? 's' : '' }} queued</p>
+        <button class="btn btn-outline btn-sm" style="width:100%;margin-top:8px" (click)="setTab('scheduled')">View All</button>
+      </div>
+
+    </aside>
+
+  </div>
+</div>
